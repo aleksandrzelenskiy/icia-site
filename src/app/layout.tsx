@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ICIA — Industrial Cellular Installer Association",
+  title: "ICIA — Ассоциация специалистов сотовой связи",
   description:
     "Платформа ICIA объединяет подрядчиков и инженеров сотовой связи по всей России. Управляйте проектами, контролируйте качество, развивайте команды."
 };
