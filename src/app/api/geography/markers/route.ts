@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getRegionLabelByCode } from "@/lib/regions";
+import { getRegionLabelByCode } from "../../../../lib/regions";
 
 type RegionStat = {
   regionCode: string;
