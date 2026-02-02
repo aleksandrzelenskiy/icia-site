@@ -401,7 +401,7 @@ export default function Home() {
               priority
             />
           </a>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 md:flex">
+          <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 lg:flex">
             <a href="/#about" className="transition hover:text-foreground">О ПРОЕКТЕ</a>
             <a href="/#mission" className="transition hover:text-foreground">МИССИЯ</a>
             <a href="/#directions" className="transition hover:text-foreground">НАПРАВЛЕНИЯ</a>
@@ -416,14 +416,14 @@ export default function Home() {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
-            <Button asChild size="default" className="hidden md:inline-flex">
+            <Button asChild size="default" className="hidden lg:inline-flex">
               <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
                 Войти
               </a>
             </Button>
             <Button
               variant="ghost"
-              className="md:hidden"
+              className="lg:hidden"
               aria-label="Открыть меню"
               onClick={() => setMenuOpen(true)}
             >
