@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #9c27b0;
+  --muted: #eef2f7;
+  --muted-foreground: #4b5563;
+  --border: rgba(15, 23, 42, 0.08);
+  --ring: #2563eb;
+  --radius: 18px;
+  --page-bg: #f5f5f5;
+  --page-gradient: linear-gradient(135deg, #f6f7fa 0%, #e8ecf4 50%, #f5f7fb 100%);
+  --appbar-bg: rgba(255, 255, 255, 0.82);
+  --appbar-border: rgba(15, 23, 42, 0.08);
+  --appbar-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+  --appbar-text: #080c1a;
+  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 25px 60px rgba(15, 23, 42, 0.12);
+  --glow-primary: #1976d2;
+  --glow-secondary: #9c27b0;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #11131a;
+  --card-foreground: #f5f7ff;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #9c27b0;
+  --muted: #141824;
+  --muted-foreground: #9aa3b2;
+  --border: rgba(255, 255, 255, 0.08);
+  --ring: #2563eb;
+  --page-bg: #1e1e1e;
+  --page-gradient: linear-gradient(135deg, #0b0d11 0%, #151b24 60%, #0c1017 100%);
+  --appbar-bg: rgba(12, 14, 20, 0.78);
+  --appbar-border: rgba(255, 255, 255, 0.08);
+  --appbar-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  --appbar-text: #f5f7ff;
+  --glass-bg: rgba(14, 18, 28, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 30px 80px rgba(0, 0, 0, 0.45);
+  --glow-primary: #1976d2;
+  --glow-secondary: #9c27b0;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 17px;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--page-gradient);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+section {
+  scroll-margin-top: 96px;
+}
+
+.grid-overlay {
+  background-image: var(--tw-gradient-stops),
+    linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: auto, 80px 80px, 80px 80px;
+}
+
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.text-gradient {
+  background: linear-gradient(
+    120deg,
+    var(--glow-primary) 0%,
+    #22d3ee 50%,
+    var(--glow-secondary) 100%
+  );
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.light .text-gradient {
+  background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 50%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+:root {
+  --auth-panel-bg: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.62),
+    rgba(15, 23, 42, 0.32)
+  );
+  --auth-panel-border: rgba(255, 255, 255, 0.18);
+  --auth-panel-shadow: 0 30px 70px -40px rgba(15, 23, 42, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  --auth-panel-blur: blur(22px) saturate(140%);
+  --auth-card-bg: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.88),
+    rgba(255, 255, 255, 0.6)
+  );
+  --auth-card-border: rgba(255, 255, 255, 0.7);
+  --auth-card-shadow: 0 25px 60px -35px rgba(15, 23, 42, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  --auth-card-blur: blur(24px) saturate(160%);
+}
