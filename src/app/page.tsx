@@ -1,6 +1,7 @@
 "use client";
 
 import Head from "next/head";
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -8,7 +9,6 @@ import {
   Camera,
   ChevronRight,
   ClipboardList,
-  Globe2,
   GraduationCap,
   Moon,
   ShieldCheck,
@@ -16,6 +16,10 @@ import {
   X,
   Users
 } from "lucide-react";
+import TelegramIcon from "@mui/icons-material/Telegram";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import Tooltip from "@mui/material/Tooltip";
 import { AnimatePresence, motion, useScroll, useSpring, useTransform } from "framer-motion";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -80,7 +84,7 @@ const audienceContent = {
     ]
   },
   specialist: {
-    title: "Профиль исполнителя",
+    title: "Монтажникам",
     description:
       "Личные задачи, чек-листы и рейтинг качества. Все инструменты для роста и уверенной работы вместе с ICIA.",
     bullets: ["Задачи и геолокации", "Удобное согласование работ", "Доступ ко всем задачам в одном месте", "Прозрачное взаимодействие с закзачиком", "Рейтинг и обучение"]
@@ -250,14 +254,9 @@ export default function Home() {
 
     const syncAnchorOffset = () => {
       const headerHeight = headerRef.current?.offsetHeight ?? 0;
-      const rootStyles = window.getComputedStyle(document.documentElement);
-      const anchorGap = Number.parseFloat(
-        rootStyles.getPropertyValue("--anchor-gap")
-      );
-      const topGap = Number.isFinite(anchorGap) ? anchorGap : 12;
       document.documentElement.style.setProperty(
         "--anchor-offset",
-        `${headerHeight + topGap}px`
+        `${headerHeight}px`
       );
     };
 
@@ -295,16 +294,22 @@ export default function Home() {
 
       <header ref={headerRef} className="fixed inset-x-0 top-0 z-40 border-b border-[var(--appbar-border)] bg-[var(--appbar-bg)] shadow-[var(--appbar-shadow)] backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3 text-sm uppercase tracking-[0.2em] text-[var(--appbar-text)]/70">
-            <span className="h-2 w-2 rounded-full bg-primary shadow-glow" />
-            ICIA
-          </div>
+          <a href="/#hero" className="flex items-center" aria-label="На главный экран">
+            <Image
+              src={theme === "dark" ? "/logo/logo-light.png" : "/logo/logo-dark.png"}
+              alt="ICIA"
+              width={132}
+              height={36}
+              className="h-9 w-auto"
+              priority
+            />
+          </a>
           <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 md:flex">
-            <a href="/#about" className="transition hover:text-foreground">О проекте</a>
-            <a href="/#mission" className="transition hover:text-foreground">Миссия</a>
-            <a href="/#directions" className="transition hover:text-foreground">Направления</a>
-            <a href="/#platform" className="transition hover:text-foreground">Приложение</a>
-            <a href="/#contact" className="transition hover:text-foreground">Контакты</a>
+            <a href="/#about" className="transition hover:text-foreground">О ПРОЕКТЕ</a>
+            <a href="/#mission" className="transition hover:text-foreground">МИССИЯ</a>
+            <a href="/#directions" className="transition hover:text-foreground">НАПРАВЛЕНИЯ</a>
+            <a href="/#platform" className="transition hover:text-foreground">ПРИЛОЖЕНИЕ</a>
+            <a href="/#contact" className="transition hover:text-foreground">КОНТАКТЫ</a>
           </nav>
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={toggleTheme} aria-label="Сменить тему">
@@ -315,7 +320,9 @@ export default function Home() {
               )}
             </Button>
             <Button asChild size="default" className="hidden md:inline-flex">
-              <a href="/#contact">Связаться</a>
+              <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
+                Войти
+              </a>
             </Button>
             <Button
               variant="ghost"
@@ -378,7 +385,14 @@ export default function Home() {
               </div>
               <div className="mt-6">
                 <Button asChild size="lg" className="w-full">
-                  <a href="/#contact" onClick={() => setMenuOpen(false)}>Связаться</a>
+                  <a
+                    href="https://ws.icia.pro/"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Войти
+                  </a>
                 </Button>
               </div>
             </motion.div>
@@ -386,7 +400,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <section className="relative flex h-screen items-center overflow-hidden pt-28">
+      <section id="hero" className="relative flex h-screen items-center overflow-hidden pt-28">
         <div className="absolute inset-0">
           <video
             className="h-full w-full object-cover opacity-60"
@@ -456,12 +470,15 @@ export default function Home() {
               ICIA объединяет подрядчиков, инженеров, операторов, проектировщиков
               объектов связи и специалистов по монтажу сотовой инфраструктуры. Мы
               создаём стандарт качества, цифровую платформу для управления
-              проектами и сообщество, которое помогает рынку двигаться быстрее.
+              проектами и сообщество, которое помогает рынку развиваться эффективнее.
             </p>
             <p>
               Платформа фиксирует каждую задачу, автоматизирует фотоотчёты,
               отслеживает статус объектов и формирует аналитику для руководителей
               проектов.
+            </p>
+            <p>
+              Особое внимание - качеству и безопасности выполнения работ. Будем рады видеть Вас с нами!
             </p>
           </div>
           <Button asChild size="lg">
@@ -474,19 +491,19 @@ export default function Home() {
           {[
             {
               title: "Единые стандарты",
-              text: "Чёткие регламенты и прозрачные SLA для всех участников."
+              text: "Чёткие регламенты и прозрачные SLA для всех участников рынка."
             },
             {
               title: "Сильная команда",
-              text: "Проверенные исполнители и системы рейтинга."
+              text: "Проверенные исполнители, подтверждение квалификации и системы рейтинга."
             },
             {
               title: "Цифровой контроль",
-              text: "Инструменты управления задачами и качеством."
+              text: "Инструменты управления задачами и контроля качества работ."
             },
             {
-              title: "Проектировщики объектов",
-              text: "Инженеры-проектировщики участвуют как исполнители: от предпроектных решений до сопровождения строительства."
+              title: "Монтажники и Проектировщики",
+              text: "Инженеры под любые задачи: инсталляторы и проектировщики - от предпроектных решений до сопровождения строительства."
             }
           ].map((item) => (
             <div
@@ -634,7 +651,7 @@ export default function Home() {
       >
         <motion.div className="flex flex-col gap-4" variants={fadeUp}>
           <p className="text-sm uppercase tracking-[0.2em] text-mutedForeground">
-            Презентация платформы
+            Платформа
           </p>
           <div className="flex flex-wrap items-center justify-between gap-6">
             <h2 className="text-3xl font-semibold sm:text-4xl">
@@ -676,6 +693,31 @@ export default function Home() {
                 </li>
               ))}
             </ul>
+
+            {audience === "specialist" && (
+              <div className="mt-8 border-t border-black/10 pt-6 dark:border-white/10">
+                <p className="text-lg font-semibold">Проектировщикам</p>
+                <p className="mt-3 text-sm text-mutedForeground">
+                  Шаблоны документации и прозрачная коммуникация.
+                  Всё для эффективной удалённой работы и роста в профессиональном
+                  сообществе ICIA.
+                </p>
+                <ul className="mt-6 space-y-3 text-sm text-mutedForeground">
+                  {[
+                    "Задания сразу с исходными данными",
+                    "Удобная сдача чертежей и документов",
+                    "Коммуникация с подрядчиком в одном окне",
+                    "Отслеживание статуса согласований",
+                    "Доступ к удаленнм задачам в любых регионах"
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-2">
+                      <ChevronRight className="h-4 w-4 text-primary" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </motion.div>
           <motion.div
             className="relative flex items-center justify-center"
@@ -805,7 +847,7 @@ export default function Home() {
               Контроль, эффективность, аналитика
             </h2>
             <ul className="space-y-3 text-mutedForeground">
-              {["Сокращение сроков работ", "Прозрачный контроль качества", "Аналитика по регионам и подрядчикам"].map(
+              {["Сокращение сроков работ", "Прозрачный контроль качества", "Аналитика по регионам и исполнителям"].map(
                 (item) => (
                   <li key={item} className="flex items-center gap-3">
                     <span className="h-2 w-2 rounded-full bg-primary" />
@@ -897,7 +939,7 @@ export default function Home() {
               Стабильные задачи и рост рейтинга
             </h2>
             <ul className="space-y-3 text-mutedForeground">
-              {["Быстрый доступ к задачам", "Прозрачный учёт оплат", "Обучение и повышение квалификации"].map(
+              {["Быстрый доступ к задачам", "Поиск публичных заказов", "Прозрачный учёт оплат", "Обучение и повышение квалификации"].map(
                 (item) => (
                   <li key={item} className="flex items-center gap-3">
                     <span className="h-2 w-2 rounded-full bg-primary" />
@@ -1029,35 +1071,43 @@ export default function Home() {
             </p>
           </div>
           <div className="space-y-2 text-sm text-mutedForeground">
-            <p className="text-xs uppercase tracking-[0.2em]">Ссылки</p>
+            <p className="text-xs uppercase tracking-[0.2em]">Меню</p>
             <a href="/#about" className="block hover:text-foreground">О проекте</a>
             <a href="/#platform" className="block hover:text-foreground">Приложение</a>
             <a href="/#contact" className="block hover:text-foreground">Контакты</a>
           </div>
           <div className="space-y-3 text-sm text-mutedForeground">
-            <p className="text-xs uppercase tracking-[0.2em]">Соцсети</p>
+            <p className="text-xs uppercase tracking-[0.2em]">Присоеденяйтесь</p>
             <div className="flex items-center gap-3">
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition hover:text-foreground"
-                aria-label="ICIA в Telegram"
-              >
-                <ArrowUpRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition hover:text-foreground"
-                aria-label="ICIA в Linkedin"
-              >
-                <Globe2 className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition hover:text-foreground"
-                aria-label="ICIA на YouTube"
-              >
-                <ArrowUpRight className="h-4 w-4" />
-              </a>
+              <Tooltip title="Телеграм" arrow placement="top">
+                <a
+                  href="https://t.me/+VbQDQSt8HJFkYjE6"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition hover:text-foreground"
+                  aria-label="Телеграм"
+                >
+                  <TelegramIcon sx={{ fontSize: 35 }} />
+                </a>
+              </Tooltip>
+              <Tooltip title="YouTube" arrow placement="top">
+                <a
+                  href="#"
+                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition hover:text-foreground"
+                  aria-label="YouTube"
+                >
+                  <YouTubeIcon sx={{ fontSize: 35 }} />
+                </a>
+              </Tooltip>
+              <Tooltip title="LinkedIn" arrow placement="top">
+                <a
+                  href="#"
+                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition hover:text-foreground"
+                  aria-label="LinkedIn"
+                >
+                  <LinkedInIcon sx={{ fontSize: 35 }} />
+                </a>
+              </Tooltip>
             </div>
           </div>
         </div>
