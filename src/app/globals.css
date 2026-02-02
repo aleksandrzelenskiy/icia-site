@@ -33,8 +33,9 @@
     rgba(37, 99, 235, 0.08),
     rgba(37, 99, 235, 0.02)
   );
-  --anchor-gap: 0px;
-  --anchor-offset: 88px;
+  --anchor-gap: 10px;
+  --anchor-offset: 10px;
+  --appbar-height: 0px;
 }
 
 .dark {
@@ -68,7 +69,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   font-size: 17px;
 }
 

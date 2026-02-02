@@ -320,7 +320,12 @@ export default function Home() {
     target: missionRef,
     offset: ["start end", "end start"]
   });
-  const missionBgY = useTransform(missionProgress, [0, 1], ["-30%", "30%"]);
+  const missionBgYRaw = useTransform(missionProgress, [0, 1], ["-30%", "30%"]);
+  const missionBgY = useSpring(missionBgYRaw, {
+    stiffness: 90,
+    damping: 26,
+    mass: 0.6
+  });
   const { scrollYProgress: platformProgress } = useScroll({
     target: platformRef,
     offset: ["start end", "end start"]
@@ -392,15 +397,77 @@ export default function Home() {
 
     const syncAnchorOffset = () => {
       const headerHeight = headerRef.current?.offsetHeight ?? 0;
+      const rootStyles = window.getComputedStyle(document.documentElement);
+      const anchorGap = Number.parseFloat(
+        rootStyles.getPropertyValue("--anchor-gap")
+      );
+      const topGap = Number.isFinite(anchorGap) ? anchorGap : 10;
+      document.documentElement.style.setProperty(
+        "--appbar-height",
+        `${headerHeight}px`
+      );
       document.documentElement.style.setProperty(
         "--anchor-offset",
-        `${headerHeight}px`
+        `${topGap}px`
       );
     };
 
     syncAnchorOffset();
     window.addEventListener("resize", syncAnchorOffset);
     return () => window.removeEventListener("resize", syncAnchorOffset);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleAnchorClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href") ?? "";
+      const isHashOnly = href.startsWith("#");
+      const isSamePageHash = href.startsWith("/#");
+      if (!isHashOnly && !isSamePageHash) return;
+
+      const hash = isHashOnly ? href : href.slice(1);
+      const id = hash.replace(/^#/, "");
+      const destination = document.getElementById(id);
+      if (!destination) return;
+
+      event.preventDefault();
+
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const rootStyles = window.getComputedStyle(document.documentElement);
+      const offset = Number.parseFloat(rootStyles.getPropertyValue("--anchor-offset")) || 0;
+      const targetTop = destination.getBoundingClientRect().top + window.scrollY - offset;
+
+      if (prefersReduced) {
+        window.scrollTo(0, targetTop);
+        return;
+      }
+
+      const startTop = window.scrollY;
+      const distance = targetTop - startTop;
+      const duration = 700;
+      const startTime = performance.now();
+
+      const easeInOutCubic = (t: number) =>
+        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+      const step = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeInOutCubic(progress);
+        window.scrollTo(0, startTop + distance * eased);
+        if (progress < 1) requestAnimationFrame(step);
+      };
+
+      requestAnimationFrame(step);
+    };
+
+    document.addEventListener("click", handleAnchorClick);
+    return () => document.removeEventListener("click", handleAnchorClick);
   }, []);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -568,7 +635,7 @@ export default function Home() {
               className="text-4xl font-semibold leading-tight text-foreground sm:text-6xl lg:text-7xl"
               variants={fadeUp}
             >
-              Объединяем<span className="text-gradient"> специалистов сотовой связи</span>
+              Ассоциация<span className="text-gradient"> специалистов сотовой связи</span>
             </motion.h1>
             <motion.p
               className="max-w-2xl text-lg text-black dark:text-mutedForeground"
