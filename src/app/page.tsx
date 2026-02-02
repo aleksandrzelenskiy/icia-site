@@ -1,7 +1,6 @@
 "use client";
 
 import Head from "next/head";
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -17,7 +16,7 @@ import {
   X,
   Users
 } from "lucide-react";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useSpring, useTransform } from "framer-motion";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,37 @@ const fadeUp = {
 const stagger = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12 } }
+};
+
+const mockupContainer = {
+  hidden: { opacity: 0, x: 48 },
+  show: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.55, ease: "easeOut", when: "beforeChildren", staggerChildren: 0.12, delayChildren: 0.08 }
+  }
+};
+
+const mockupItem = {
+  hidden: { opacity: 0, x: 30 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.45, ease: "easeOut" } }
+};
+
+const mockupScreens = {
+  contractor: {
+    main: "/mockups/contractor-desktop-main.png",
+    overlays: [
+      "/mockups/contractor-desktop-side-1.png",
+      "/mockups/contractor-desktop-side-2.png"
+    ]
+  },
+  specialist: {
+    main: "/mockups/specialist-mobile-main.png",
+    overlays: [
+      "/mockups/specialist-mobile-side-1.png",
+      "/mockups/specialist-mobile-side-2.png"
+    ]
+  }
 };
 
 const audienceContent = {
@@ -141,12 +171,29 @@ function YandexMap() {
 }
 
 export default function Home() {
+  const headerRef = useRef<HTMLElement | null>(null);
   const missionRef = useRef<HTMLDivElement | null>(null);
+  const platformRef = useRef<HTMLElement | null>(null);
   const { scrollYProgress: missionProgress } = useScroll({
     target: missionRef,
     offset: ["start end", "end start"]
   });
   const missionBgY = useTransform(missionProgress, [0, 1], ["-30%", "30%"]);
+  const { scrollYProgress: platformProgress } = useScroll({
+    target: platformRef,
+    offset: ["start end", "end start"]
+  });
+  const platformMainYRaw = useTransform(platformProgress, [0, 1], [68, -68]);
+  const platformOverlayTopYRaw = useTransform(platformProgress, [0, 1], [96, -96]);
+  const platformOverlayTopXRaw = useTransform(platformProgress, [0, 1], [40, -40]);
+  const platformOverlayBottomYRaw = useTransform(platformProgress, [0, 1], [-76, 76]);
+  const platformOverlayBottomXRaw = useTransform(platformProgress, [0, 1], [-32, 32]);
+  const springParallax = { stiffness: 90, damping: 26, mass: 0.45 };
+  const platformMainY = useSpring(platformMainYRaw, springParallax);
+  const platformOverlayTopY = useSpring(platformOverlayTopYRaw, springParallax);
+  const platformOverlayTopX = useSpring(platformOverlayTopXRaw, springParallax);
+  const platformOverlayBottomY = useSpring(platformOverlayBottomYRaw, springParallax);
+  const platformOverlayBottomX = useSpring(platformOverlayBottomXRaw, springParallax);
 
   const [audience, setAudience] = useState<"contractor" | "specialist">(
     "contractor"
@@ -198,6 +245,27 @@ export default function Home() {
     document.body.style.overflow = menuOpen ? "hidden" : "";
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const syncAnchorOffset = () => {
+      const headerHeight = headerRef.current?.offsetHeight ?? 0;
+      const rootStyles = window.getComputedStyle(document.documentElement);
+      const anchorGap = Number.parseFloat(
+        rootStyles.getPropertyValue("--anchor-gap")
+      );
+      const topGap = Number.isFinite(anchorGap) ? anchorGap : 12;
+      document.documentElement.style.setProperty(
+        "--anchor-offset",
+        `${headerHeight + topGap}px`
+      );
+    };
+
+    syncAnchorOffset();
+    window.addEventListener("resize", syncAnchorOffset);
+    return () => window.removeEventListener("resize", syncAnchorOffset);
+  }, []);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
@@ -225,28 +293,18 @@ export default function Home() {
         />
       </Head>
 
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-[var(--appbar-border)] bg-[var(--appbar-bg)] shadow-[var(--appbar-shadow)] backdrop-blur">
+      <header ref={headerRef} className="fixed inset-x-0 top-0 z-40 border-b border-[var(--appbar-border)] bg-[var(--appbar-bg)] shadow-[var(--appbar-shadow)] backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3 text-sm uppercase tracking-[0.2em] text-[var(--appbar-text)]/70">
             <span className="h-2 w-2 rounded-full bg-primary shadow-glow" />
             ICIA
           </div>
           <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 md:flex">
-            <Link href="#about" className="transition hover:text-foreground">
-              О проекте
-            </Link>
-            <Link href="#mission" className="transition hover:text-foreground">
-              Миссия
-            </Link>
-            <Link href="#directions" className="transition hover:text-foreground">
-              Направления
-            </Link>
-            <Link href="#platform" className="transition hover:text-foreground">
-              Приложение
-            </Link>
-            <Link href="#contact" className="transition hover:text-foreground">
-              Контакты
-            </Link>
+            <a href="/#about" className="transition hover:text-foreground">О проекте</a>
+            <a href="/#mission" className="transition hover:text-foreground">Миссия</a>
+            <a href="/#directions" className="transition hover:text-foreground">Направления</a>
+            <a href="/#platform" className="transition hover:text-foreground">Приложение</a>
+            <a href="/#contact" className="transition hover:text-foreground">Контакты</a>
           </nav>
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={toggleTheme} aria-label="Сменить тему">
@@ -257,7 +315,7 @@ export default function Home() {
               )}
             </Button>
             <Button asChild size="default" className="hidden md:inline-flex">
-              <Link href="#contact">Связаться</Link>
+              <a href="/#contact">Связаться</a>
             </Button>
             <Button
               variant="ghost"
@@ -312,27 +370,15 @@ export default function Home() {
                 </Button>
               </div>
               <div className="mt-6 flex flex-col gap-4 text-base font-semibold text-foreground">
-                <Link href="#about" onClick={() => setMenuOpen(false)}>
-                  О проекте
-                </Link>
-                <Link href="#mission" onClick={() => setMenuOpen(false)}>
-                  Миссия
-                </Link>
-                <Link href="#directions" onClick={() => setMenuOpen(false)}>
-                  Направления
-                </Link>
-                <Link href="#platform" onClick={() => setMenuOpen(false)}>
-                  Приложение
-                </Link>
-                <Link href="#contact" onClick={() => setMenuOpen(false)}>
-                  Контакты
-                </Link>
+                <a href="/#about" onClick={() => setMenuOpen(false)}>О проекте</a>
+                <a href="/#mission" onClick={() => setMenuOpen(false)}>Миссия</a>
+                <a href="/#directions" onClick={() => setMenuOpen(false)}>Направления</a>
+                <a href="/#platform" onClick={() => setMenuOpen(false)}>Приложение</a>
+                <a href="/#contact" onClick={() => setMenuOpen(false)}>Контакты</a>
               </div>
               <div className="mt-6">
                 <Button asChild size="lg" className="w-full">
-                  <Link href="#contact" onClick={() => setMenuOpen(false)}>
-                    Связаться
-                  </Link>
+                  <a href="/#contact" onClick={() => setMenuOpen(false)}>Связаться</a>
                 </Button>
               </div>
             </motion.div>
@@ -348,7 +394,6 @@ export default function Home() {
             loop
             muted
             playsInline
-            poster="/hero-poster.svg"
           >
             <source src="/hero.mp4" type="video/mp4" />
           </video>
@@ -385,15 +430,12 @@ export default function Home() {
             </motion.p>
             <motion.div variants={fadeUp}>
               <Button asChild size="xl">
-                <Link href="#about">
-                  Узнать больше <ArrowUpRight className="h-4 w-4" />
-                </Link>
+                <a href="/#about">Узнать больше <ArrowUpRight className="h-4 w-4" /></a>
               </Button>
             </motion.div>
           </motion.div>
         </div>
       </section>
-
       <motion.section
         id="about"
         className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-24 md:grid-cols-[1.1fr_0.9fr]"
@@ -457,7 +499,6 @@ export default function Home() {
           ))}
         </motion.div>
       </motion.section>
-
       <motion.section
         id="mission"
         ref={missionRef}
@@ -498,7 +539,6 @@ export default function Home() {
           </p>
         </motion.div>
       </motion.section>
-
       <motion.section
         id="directions"
         className="mx-auto w-full max-w-6xl px-6 py-24"
@@ -547,7 +587,6 @@ export default function Home() {
           ))}
         </motion.div>
       </motion.section>
-
       <motion.section
         id="geography"
         className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-24 lg:grid-cols-[1fr_1.1fr]"
@@ -584,9 +623,9 @@ export default function Home() {
           <YandexMap />
         </motion.div>
       </motion.section>
-
       <motion.section
         id="platform"
+        ref={platformRef}
         className="mx-auto w-full max-w-6xl px-6 py-24"
         initial="hidden"
         whileInView="show"
@@ -639,25 +678,110 @@ export default function Home() {
             </ul>
           </motion.div>
           <motion.div
-            className="grid gap-4 rounded-2xl border border-black/5 bg-white/70 p-6 dark:border-white/10 dark:bg-white/5"
+            className="relative flex items-center justify-center"
             variants={fadeUp}
           >
-            {["Интерфейс задач", "Геолокации", "Фотоотчеты"].map(
-              (item, index) => (
-                <div
-                  key={item}
-                  className="flex items-center justify-between rounded-2xl border border-black/5 bg-white/80 px-5 py-4 dark:border-white/10 dark:bg-[#0b1329]"
+            <AnimatePresence mode="wait">
+              {audience === "contractor" ? (
+                <motion.div
+                  key="contractor-mockup"
+                  className="w-full max-w-[560px]"
+                  initial="hidden"
+                  animate="show"
+                  exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }}
+                  variants={mockupContainer}
+                  style={{ y: platformMainY }}
                 >
-                  <div>
-                    <p className="text-sm font-semibold">{item}</p>
-                    <p className="mt-1 text-xs text-mutedForeground">
-                      Экран {index + 1}
-                    </p>
+                  <div className="rounded-[1.6rem] border border-slate-900/60 bg-slate-950 p-3 shadow-[0_20px_50px_rgba(15,23,42,0.3)]">
+                    <div className="rounded-[0.95rem] bg-slate-800 px-4 pb-3 pt-2">
+                      <div className="mb-2 flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-rose-400/70" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-amber-300/70" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
+                      </div>
+                      <div className="relative overflow-hidden rounded-[0.8rem] border border-slate-700/80">
+                        <img
+                          src={mockupScreens.contractor.main}
+                          alt="Скриншот интерфейса подрядчика"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-xs text-primary">Preview</span>
-                </div>
-              )
-            )}
+                  <motion.div
+                    className="absolute -right-10 top-4 w-52 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg dark:border-slate-700/80 dark:bg-slate-900/90"
+                    variants={mockupItem}
+                    style={{ y: platformOverlayTopY, x: platformOverlayTopX }}
+                  >
+                    <img
+                      src={mockupScreens.contractor.overlays[0]}
+                      alt="Дополнительный скриншот подрядчика 1"
+                      className="w-full rounded-lg object-cover"
+                    />
+                  </motion.div>
+                  <motion.div
+                    className="absolute -bottom-10 right-6 w-56 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg dark:border-slate-700/80 dark:bg-slate-900/90"
+                    variants={mockupItem}
+                    style={{ y: platformOverlayBottomY, x: platformOverlayBottomX }}
+                  >
+                    <img
+                      src={mockupScreens.contractor.overlays[1]}
+                      alt="Дополнительный скриншот подрядчика 2"
+                      className="w-full rounded-lg object-cover"
+                    />
+                  </motion.div>
+                  <motion.div
+                    className="mx-auto h-3 w-[86%] rounded-b-[2rem] bg-slate-300/80 shadow-inner dark:bg-slate-700/90"
+                    variants={mockupItem}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="specialist-mockup"
+                  className="w-full max-w-[340px]"
+                  initial="hidden"
+                  animate="show"
+                  exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }}
+                  variants={mockupContainer}
+                  style={{ y: platformMainY }}
+                >
+                  <div className="rounded-[2.2rem] border border-slate-900/60 bg-slate-900 p-2 shadow-[0_24px_50px_rgba(15,23,42,0.35)]">
+                    <div className="overflow-hidden rounded-[1.8rem] bg-slate-950 p-2">
+                      <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-slate-700" />
+                      <div className="overflow-hidden rounded-[1.45rem] border border-slate-800/80">
+                        <img
+                          src={mockupScreens.specialist.main}
+                          alt="Скриншот интерфейса исполнителя"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <motion.div
+                    className="absolute -right-12 top-12 w-44 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg dark:border-slate-700/80 dark:bg-slate-900/90"
+                    variants={mockupItem}
+                    style={{ y: platformOverlayTopY, x: platformOverlayTopX }}
+                  >
+                    <img
+                      src={mockupScreens.specialist.overlays[0]}
+                      alt="Дополнительный скриншот исполнителя 1"
+                      className="w-full rounded-lg object-cover"
+                    />
+                  </motion.div>
+                  <motion.div
+                    className="absolute -bottom-9 -left-12 w-48 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg dark:border-slate-700/80 dark:bg-slate-900/90"
+                    variants={mockupItem}
+                    style={{ y: platformOverlayBottomY, x: platformOverlayBottomX }}
+                  >
+                    <img
+                      src={mockupScreens.specialist.overlays[1]}
+                      alt="Дополнительный скриншот исполнителя 2"
+                      className="w-full rounded-lg object-cover"
+                    />
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       </motion.section>
@@ -790,7 +914,6 @@ export default function Home() {
           </div>
         </motion.div>
       </motion.section>
-
       <motion.section
         id="contact"
         className="mx-auto w-full max-w-5xl px-6 py-24"
@@ -907,15 +1030,9 @@ export default function Home() {
           </div>
           <div className="space-y-2 text-sm text-mutedForeground">
             <p className="text-xs uppercase tracking-[0.2em]">Ссылки</p>
-            <Link href="#about" className="block hover:text-foreground">
-              О проекте
-            </Link>
-            <Link href="#platform" className="block hover:text-foreground">
-              Приложение
-            </Link>
-            <Link href="#contact" className="block hover:text-foreground">
-              Контакты
-            </Link>
+            <a href="/#about" className="block hover:text-foreground">О проекте</a>
+            <a href="/#platform" className="block hover:text-foreground">Приложение</a>
+            <a href="/#contact" className="block hover:text-foreground">Контакты</a>
           </div>
           <div className="space-y-3 text-sm text-mutedForeground">
             <p className="text-xs uppercase tracking-[0.2em]">Соцсети</p>

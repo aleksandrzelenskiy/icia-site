@@ -27,6 +27,14 @@
   --shadow-soft: 0 25px 60px rgba(15, 23, 42, 0.12);
   --glow-primary: #1976d2;
   --glow-secondary: #9c27b0;
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+  --tw-gradient-stops: linear-gradient(
+    180deg,
+    rgba(37, 99, 235, 0.08),
+    rgba(37, 99, 235, 0.02)
+  );
+  --anchor-gap: 5px;
+  --anchor-offset: 88px;
 }
 
 .dark {
@@ -68,16 +76,20 @@ body {
   min-height: 100vh;
   background: var(--page-gradient);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: "Manrope", "Segoe UI", sans-serif;
   overflow-x: hidden;
 }
 
 section {
-  scroll-margin-top: 96px;
+  scroll-margin-top: var(--anchor-offset);
 }
 
+
 .grid-overlay {
-  background-image: var(--tw-gradient-stops),
+  background-image: var(
+      --tw-gradient-stops,
+      linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.02))
+    ),
     linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
   background-size: auto, 80px 80px, 80px 80px;
