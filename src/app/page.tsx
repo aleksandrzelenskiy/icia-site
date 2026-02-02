@@ -124,11 +124,51 @@ const directions = [
   }
 ];
 
-const mapMarkers: Array<{ coords: [number, number]; label: string }> = [
-  { coords: [55.751244, 37.618423], label: "Москва" }
+type RegionStat = { regionCode: string; label: string; count: number };
+type MapMarker = {
+  coords: [number, number];
+  label: string;
+  count: number;
+  regionCode: string;
+};
+
+const fallbackRegions: RegionStat[] = [
+  { regionCode: "38", label: "Иркутская область", count: 1 }
 ];
+const contractorOverlayImageClass = "w-full rounded-lg object-cover";
+const regionGeocodeCache = new Map<string, [number, number]>();
 
 function YandexMap() {
+  const [regions, setRegions] = useState<RegionStat[]>(fallbackRegions);
+  const mapInstanceRef = useRef<any>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchRegions = async () => {
+      try {
+        const response = await fetch("/api/geography/markers", {
+          cache: "no-store"
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const nextRegions = Array.isArray(payload?.regions) ? payload.regions : [];
+
+        if (!cancelled && nextRegions.length > 0) {
+          setRegions(nextRegions);
+        }
+      } catch {
+        // Keep fallback regions when API is unavailable.
+      }
+    };
+
+    fetchRegions();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -136,36 +176,93 @@ function YandexMap() {
       const ymaps = (window as any).ymaps;
       if (!ymaps) return;
 
-      ymaps.ready(() => {
+      ymaps.ready(async () => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.destroy();
+          mapInstanceRef.current = null;
+        }
+
         const mapInstance = new ymaps.Map("icia-map", {
           center: [61.524, 105.318],
           zoom: 3,
           controls: []
         });
 
-        mapMarkers.forEach((marker) => {
+        const resolvedMarkers = (
+          await Promise.all(
+            regions.map(async (region): Promise<MapMarker | null> => {
+              const cachedCoords = regionGeocodeCache.get(region.regionCode);
+              if (cachedCoords) {
+                return {
+                  coords: cachedCoords,
+                  label: region.label,
+                  count: region.count,
+                  regionCode: region.regionCode
+                };
+              }
+
+              try {
+                const geocodeResult = await ymaps.geocode(`${region.label}, Россия`, {
+                  results: 1
+                });
+                const first = geocodeResult.geoObjects.get(0);
+                const coords = first?.geometry?.getCoordinates?.();
+                if (!Array.isArray(coords) || coords.length !== 2) return null;
+                const normalized: [number, number] = [coords[0], coords[1]];
+                regionGeocodeCache.set(region.regionCode, normalized);
+                return {
+                  coords: normalized,
+                  label: region.label,
+                  count: region.count,
+                  regionCode: region.regionCode
+                };
+              } catch {
+                return null;
+              }
+            })
+          )
+        ).filter((marker): marker is MapMarker => marker !== null);
+
+        resolvedMarkers.forEach((marker) => {
           mapInstance.geoObjects.add(
             new ymaps.Placemark(
               marker.coords,
-              { balloonContent: marker.label },
-              { preset: "islands#blueCircleDotIcon" }
+              {
+                iconCaption: `${marker.count}`,
+                balloonContent: `${marker.label}: ${marker.count} пользователей`
+              },
+              { preset: "islands#blueCircleDotIconWithCaption" }
             )
           );
         });
+
+        mapInstanceRef.current = mapInstance;
       });
     };
 
-    if (!(window as any).ymaps) {
+    const existingScript = document.getElementById("yandex-maps-script") as HTMLScriptElement | null;
+    if (!(window as any).ymaps && !existingScript) {
+      const yandexMapsApiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_APIKEY;
       const script = document.createElement("script");
+      script.id = "yandex-maps-script";
       script.src =
-        "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=YOUR_API_KEY";
+        `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${yandexMapsApiKey ?? ""}`;
       script.async = true;
       script.onload = initMap;
       document.body.appendChild(script);
+    } else if (existingScript && !(window as any).ymaps) {
+      existingScript.addEventListener("load", initMap, { once: true });
     } else {
       initMap();
     }
-  }, []);
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.destroy();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [regions]);
 
   return (
     <div className="glass h-[420px] w-full max-w-full min-w-0 overflow-hidden rounded-2xl p-3">
@@ -751,25 +848,25 @@ export default function Home() {
                     </div>
                   </div>
                   <motion.div
-                    className="absolute -right-10 top-4 w-52 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg dark:border-slate-700/80 dark:bg-slate-900/90"
+                    className="absolute -right-10 top-4 w-56 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg md:w-60 lg:w-64 dark:border-slate-700/80 dark:bg-slate-900/90"
                     variants={mockupItem}
                     style={{ y: platformOverlayTopY, x: platformOverlayTopX }}
                   >
                     <img
                       src={mockupScreens.contractor.overlays[0]}
                       alt="Дополнительный скриншот подрядчика 1"
-                      className="w-full rounded-lg object-cover"
+                      className={contractorOverlayImageClass}
                     />
                   </motion.div>
                   <motion.div
-                    className="absolute -bottom-10 right-6 w-56 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg dark:border-slate-700/80 dark:bg-slate-900/90"
+                    className="absolute -bottom-10 right-6 w-60 overflow-hidden rounded-xl border border-slate-300/60 bg-white/95 p-1.5 shadow-lg md:w-64 lg:w-72 dark:border-slate-700/80 dark:bg-slate-900/90"
                     variants={mockupItem}
                     style={{ y: platformOverlayBottomY, x: platformOverlayBottomX }}
                   >
                     <img
                       src={mockupScreens.contractor.overlays[1]}
                       alt="Дополнительный скриншот подрядчика 2"
-                      className="w-full rounded-lg object-cover"
+                      className={contractorOverlayImageClass}
                     />
                   </motion.div>
                   <motion.div
