@@ -141,6 +141,8 @@ const regionGeocodeCache = new Map<string, [number, number]>();
 function YandexMap() {
   const [regions, setRegions] = useState<RegionStat[]>(fallbackRegions);
   const mapInstanceRef = useRef<any>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -264,9 +266,48 @@ function YandexMap() {
     };
   }, [regions]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const active = Boolean(document.fullscreenElement);
+      setIsFullscreen(active);
+      if (active && mapInstanceRef.current?.container?.fitToViewport) {
+        setTimeout(() => mapInstanceRef.current.container.fitToViewport(), 0);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    const container = mapContainerRef.current as any;
+    if (!container) return;
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    if (container.requestFullscreen) {
+      await container.requestFullscreen();
+    } else if (container.webkitRequestFullscreen) {
+      container.webkitRequestFullscreen();
+    }
+  };
+
   return (
-    <div className="glass h-[420px] w-full max-w-full min-w-0 overflow-hidden rounded-2xl p-3">
-      <div id="icia-map" className="h-full w-full rounded-[18px]" />
+    <div
+      ref={mapContainerRef}
+      className="glass relative h-[420px] w-full max-w-full min-w-0 overflow-hidden rounded-2xl"
+    >
+      <div id="icia-map" className="h-full w-full" />
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        className="absolute right-3 top-3 z-10 rounded-full border border-white/30 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm transition hover:bg-white"
+      >
+        {isFullscreen ? "Обычный режим" : "На весь экран"}
+      </button>
     </div>
   );
 }
@@ -401,9 +442,8 @@ export default function Home() {
               priority
             />
           </a>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 lg:flex">
+          <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 min-[900px]:flex">
             <a href="/#about" className="transition hover:text-foreground">О ПРОЕКТЕ</a>
-            <a href="/#mission" className="transition hover:text-foreground">МИССИЯ</a>
             <a href="/#directions" className="transition hover:text-foreground">НАПРАВЛЕНИЯ</a>
             <a href="/#platform" className="transition hover:text-foreground">ПРИЛОЖЕНИЕ</a>
             <a href="/#contact" className="transition hover:text-foreground">КОНТАКТЫ</a>
@@ -416,14 +456,14 @@ export default function Home() {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
-            <Button asChild size="default" className="hidden lg:inline-flex">
+            <Button asChild size="default" className="hidden min-[900px]:inline-flex">
               <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
                 Войти
               </a>
             </Button>
             <Button
               variant="ghost"
-              className="lg:hidden"
+              className="min-[900px]:hidden"
               aria-label="Открыть меню"
               onClick={() => setMenuOpen(true)}
             >
@@ -474,11 +514,10 @@ export default function Home() {
                 </Button>
               </div>
               <div className="mt-6 flex flex-col gap-4 text-base font-semibold text-foreground">
-                <a href="/#about" onClick={() => setMenuOpen(false)}>О проекте</a>
-                <a href="/#mission" onClick={() => setMenuOpen(false)}>Миссия</a>
-                <a href="/#directions" onClick={() => setMenuOpen(false)}>Направления</a>
-                <a href="/#platform" onClick={() => setMenuOpen(false)}>Приложение</a>
-                <a href="/#contact" onClick={() => setMenuOpen(false)}>Контакты</a>
+                <a href="/#about" onClick={() => setMenuOpen(false)}>О ПРОЕКТЕ</a>
+                <a href="/#directions" onClick={() => setMenuOpen(false)}>НАПРАВЛЕНИЯ</a>
+                <a href="/#platform" onClick={() => setMenuOpen(false)}>ПРИЛОЖЕНИЕ</a>
+                <a href="/#contact" onClick={() => setMenuOpen(false)}>КОНТАКТЫ</a>
               </div>
               <div className="mt-6">
                 <Button asChild size="lg" className="w-full">
