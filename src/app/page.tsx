@@ -70,6 +70,14 @@ const mockupScreens = {
   }
 };
 
+const preventImageContextMenu = (event: React.MouseEvent) => {
+  event.preventDefault();
+};
+
+const preventImageDragStart = (event: React.DragEvent) => {
+  event.preventDefault();
+};
+
 const audienceContent = {
   contractor: {
     title: "Панель подрядчика",
@@ -377,6 +385,29 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const handleContextMenu = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.tagName === "IMG" || target?.closest("img")) {
+        event.preventDefault();
+      }
+    };
+
+    const handleDragStart = (event: DragEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.tagName === "IMG" || target?.closest("img")) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("dragstart", handleDragStart);
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("dragstart", handleDragStart);
+    };
+  }, []);
+
+  useEffect(() => {
     const savedTheme =
       typeof window !== "undefined"
         ? window.localStorage.getItem("icia-theme")
@@ -537,6 +568,9 @@ export default function Home() {
               width={132}
               height={36}
               className="h-9 w-auto"
+              draggable={false}
+              onContextMenu={preventImageContextMenu}
+              onDragStart={preventImageDragStart}
               priority
             />
           </a>
@@ -980,6 +1014,9 @@ export default function Home() {
                           src={mockupScreens.contractor.main}
                           alt="Скриншот интерфейса подрядчика"
                           className="h-full w-full object-cover"
+                          draggable={false}
+                          onContextMenu={preventImageContextMenu}
+                          onDragStart={preventImageDragStart}
                         />
                       </div>
                     </div>
@@ -993,6 +1030,9 @@ export default function Home() {
                       src={mockupScreens.contractor.overlays[0]}
                       alt="Дополнительный скриншот подрядчика 1"
                       className={contractorOverlayImageClass}
+                      draggable={false}
+                      onContextMenu={preventImageContextMenu}
+                      onDragStart={preventImageDragStart}
                     />
                   </motion.div>
                   <motion.div
@@ -1004,6 +1044,9 @@ export default function Home() {
                       src={mockupScreens.contractor.overlays[1]}
                       alt="Дополнительный скриншот подрядчика 2"
                       className={contractorOverlayImageClass}
+                      draggable={false}
+                      onContextMenu={preventImageContextMenu}
+                      onDragStart={preventImageDragStart}
                     />
                   </motion.div>
                   <motion.div
@@ -1029,6 +1072,9 @@ export default function Home() {
                           src={mockupScreens.specialist.main}
                           alt="Скриншот интерфейса исполнителя"
                           className="h-full w-full object-cover"
+                          draggable={false}
+                          onContextMenu={preventImageContextMenu}
+                          onDragStart={preventImageDragStart}
                         />
                       </div>
                     </div>
@@ -1042,6 +1088,9 @@ export default function Home() {
                       src={mockupScreens.specialist.overlays[0]}
                       alt="Дополнительный скриншот исполнителя 1"
                       className="w-full rounded-lg object-cover"
+                      draggable={false}
+                      onContextMenu={preventImageContextMenu}
+                      onDragStart={preventImageDragStart}
                     />
                   </motion.div>
                   <motion.div
@@ -1053,6 +1102,9 @@ export default function Home() {
                       src={mockupScreens.specialist.overlays[1]}
                       alt="Дополнительный скриншот исполнителя 2"
                       className="w-full rounded-lg object-cover"
+                      draggable={false}
+                      onContextMenu={preventImageContextMenu}
+                      onDragStart={preventImageDragStart}
                     />
                   </motion.div>
                 </motion.div>
