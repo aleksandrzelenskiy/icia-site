@@ -351,8 +351,10 @@ export default function Home() {
     role: "contractor",
     message: ""
   });
+  const [company, setCompany] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -470,8 +472,9 @@ export default function Home() {
     return () => document.removeEventListener("click", handleAnchorClick);
   }, []);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSubmitting) return;
     const nextErrors: Record<string, string> = {};
 
     if (!formState.name.trim()) nextErrors.name = "Введите имя";
@@ -481,9 +484,37 @@ export default function Home() {
     if (!formState.message.trim()) nextErrors.message = "Добавьте сообщение";
 
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) {
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setIsSubmitting(true);
+    setSubmitted(false);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formState, company })
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Не удалось отправить сообщение. Попробуйте позже.";
+        try {
+          const payload = await response.json();
+          if (payload?.error) errorMessage = payload.error;
+        } catch {
+          // ignore invalid JSON
+        }
+        setErrors({ form: errorMessage });
+        return;
+      }
+
       setSubmitted(true);
       setFormState({ name: "", email: "", role: "contractor", message: "" });
+      setCompany("");
+    } catch {
+      setErrors({ form: "Не удалось отправить сообщение. Попробуйте позже." });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -681,7 +712,7 @@ export default function Home() {
               проектов.
             </p>
             <p>
-              Особое внимание - качеству и безопасности выполнения работ. Будем рады видеть Вас с нами!
+             Будем рады видеть Вас с нами!
             </p>
           </div>
           <Button asChild size="lg">
@@ -1184,6 +1215,17 @@ export default function Home() {
           className="glass mt-10 grid gap-6 rounded-2xl p-8"
           variants={fadeUp}
         >
+          <div className="sr-only" style={{ position: "absolute", left: "-9999px" }} aria-hidden="true">
+            <Label htmlFor="company">Компания</Label>
+            <Input
+              id="company"
+              name="company"
+              value={company}
+              onChange={(event) => setCompany(event.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Имя</Label>
@@ -1246,9 +1288,12 @@ export default function Home() {
               <p className="text-xs text-red-300">{errors.message}</p>
             )}
           </div>
-          <Button type="submit" size="lg">
-            Отправить
+          <Button type="submit" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? "Отправка..." : "Отправить"}
           </Button>
+          {errors.form && (
+            <p className="text-sm text-red-300">{errors.form}</p>
+          )}
           {submitted && (
             <Alert className="border-primary/40">
               <AlertTitle>Спасибо!</AlertTitle>
