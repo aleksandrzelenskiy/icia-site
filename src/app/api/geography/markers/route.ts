@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { MongoClient } from "mongodb";
 
-import { getRegionLabelByCode } from "../../../../lib/regions";
+import { getRegionLabelByCode } from "@/lib/regions";
 
 type RegionStat = {
   regionCode: string;
@@ -20,6 +21,10 @@ const FALLBACK_REGIONS: RegionStat[] = [
 ];
 
 const MAX_REGIONS = 200;
+const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "ciwork";
+
+let clientPromise: Promise<MongoClient> | null = null;
 
 const toPositiveInt = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isFinite(value) && value > 0) {
@@ -97,45 +102,95 @@ const parseUpstreamPayload = (payload: unknown): RegionStat[] => {
   return parseRegionArray(payload);
 };
 
+const getMongoClient = () => {
+  if (!MONGODB_URI) return null;
+  if (!clientPromise) {
+    clientPromise = new MongoClient(MONGODB_URI).connect();
+  }
+  return clientPromise;
+};
+
+const fetchRegionsFromMongo = async (): Promise<RegionStat[]> => {
+  const clientConnection = getMongoClient();
+  if (!clientConnection) return [];
+
+  const client = await clientConnection;
+  const db = client.db(MONGODB_DB_NAME);
+
+  const rows = await db
+    .collection("users")
+    .aggregate([
+      {
+        $project: {
+          regionCodeStr: {
+            $trim: {
+              input: { $toString: "$regionCode" }
+            }
+          }
+        }
+      },
+      { $match: { regionCodeStr: { $regex: "^[0-9]{1,2}$" } } },
+      {
+        $project: {
+          regionCode: {
+            $substrCP: [{ $concat: ["0", "$regionCodeStr"] }, -2, 2]
+          }
+        }
+      },
+      { $group: { _id: "$regionCode", count: { $sum: 1 } } },
+      { $project: { _id: 0, regionCode: "$_id", count: 1 } },
+      { $sort: { count: -1 } },
+      { $limit: MAX_REGIONS }
+    ])
+    .toArray();
+
+  return parseRegionArray(rows);
+};
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const upstreamUrl = process.env.GEOGRAPHY_REGIONS_API_URL;
   const upstreamToken = process.env.GEOGRAPHY_REGIONS_API_TOKEN;
 
-  if (!upstreamUrl) {
-    return NextResponse.json(
-      { regions: FALLBACK_REGIONS },
-      { headers: { "Cache-Control": "no-store" } }
-    );
+  if (upstreamUrl) {
+    try {
+      const response = await fetch(upstreamUrl, {
+        cache: "no-store",
+        headers: upstreamToken
+          ? { Authorization: `Bearer ${upstreamToken}` }
+          : undefined
+      });
+
+      if (response.ok) {
+        const payload = await response.json();
+        const regions = parseUpstreamPayload(payload);
+        if (regions.length > 0) {
+          return NextResponse.json(
+            { regions, source: "upstream" },
+            { headers: { "Cache-Control": "no-store" } }
+          );
+        }
+      }
+    } catch {
+      // Fall back to direct mongo lookup.
+    }
   }
 
   try {
-    const response = await fetch(upstreamUrl, {
-      cache: "no-store",
-      headers: upstreamToken
-        ? { Authorization: `Bearer ${upstreamToken}` }
-        : undefined
-    });
-
-    if (!response.ok) {
+    const mongoRegions = await fetchRegionsFromMongo();
+    if (mongoRegions.length > 0) {
       return NextResponse.json(
-        { regions: FALLBACK_REGIONS },
+        { regions: mongoRegions, source: "mongo" },
         { headers: { "Cache-Control": "no-store" } }
       );
     }
-
-    const payload = await response.json();
-    const regions = parseUpstreamPayload(payload);
-
-    return NextResponse.json(
-      { regions: regions.length > 0 ? regions : FALLBACK_REGIONS },
-      { headers: { "Cache-Control": "no-store" } }
-    );
   } catch {
-    return NextResponse.json(
-      { regions: FALLBACK_REGIONS },
-      { headers: { "Cache-Control": "no-store" } }
-    );
+    // Fall through to static fallback.
   }
+
+  return NextResponse.json(
+    { regions: FALLBACK_REGIONS, source: "fallback" },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }
