@@ -183,7 +183,7 @@ async function fitMapToRussia(mapInstance: any, ymaps: any) {
 }
 
 function YandexMap() {
-  const [regions, setRegions] = useState<RegionStat[]>(fallbackRegions);
+  const [regions, setRegions] = useState<RegionStat[]>([]);
   const mapInstanceRef = useRef<any>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -196,16 +196,19 @@ function YandexMap() {
         const response = await fetch("/api/geography/markers", {
           cache: "no-store"
         });
-        if (!response.ok) return;
+        if (!response.ok) {
+          if (!cancelled) setRegions(fallbackRegions);
+          return;
+        }
 
         const payload = await response.json();
         const nextRegions = Array.isArray(payload?.regions) ? payload.regions : [];
 
-        if (!cancelled && nextRegions.length > 0) {
-          setRegions(nextRegions);
+        if (!cancelled) {
+          setRegions(nextRegions.length > 0 ? nextRegions : fallbackRegions);
         }
       } catch {
-        // Keep fallback regions when API is unavailable.
+        if (!cancelled) setRegions(fallbackRegions);
       }
     };
 
@@ -217,6 +220,7 @@ function YandexMap() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (regions.length === 0) return;
 
     const initMap = () => {
       const ymaps = (window as any).ymaps;
