@@ -145,12 +145,40 @@ const fallbackRegions: RegionStat[] = [
 ];
 const contractorOverlayImageClass = "w-full rounded-lg object-cover";
 const regionGeocodeCache = new Map<string, [number, number]>();
+let russiaBoundsCache: [[number, number], [number, number]] | null = null;
 const regionCoordsByCode = new Map<string, [number, number]>([
   ["23", [45.0355, 38.9753]], // Краснодар
   ["38", [52.2869, 104.3050]], // Иркутск
   ["77", [55.7558, 37.6176]], // Москва
   ["78", [59.9343, 30.3351]] // Санкт-Петербург
 ]);
+const RUSSIA_BOUNDS_FALLBACK: [[number, number], [number, number]] = [
+  [41.185353, 19.6389],
+  [81.857361, 180]
+];
+
+async function fitMapToRussia(mapInstance: any, ymaps: any) {
+  if (!mapInstance || !ymaps) return;
+
+  if (!russiaBoundsCache) {
+    try {
+      const geocodeResult = await ymaps.geocode("Россия", { results: 1 });
+      const first = geocodeResult.geoObjects.get(0);
+      const bounds = first?.properties?.get("boundedBy");
+      if (Array.isArray(bounds) && bounds.length === 2) {
+        russiaBoundsCache = bounds as [[number, number], [number, number]];
+      }
+    } catch {
+      // Fall through to fallback bounds.
+    }
+  }
+
+  mapInstance.setBounds(russiaBoundsCache ?? RUSSIA_BOUNDS_FALLBACK, {
+    checkZoomRange: true,
+    zoomMargin: [24, 24, 24, 24],
+    duration: 200
+  });
+}
 
 function YandexMap() {
   const [regions, setRegions] = useState<RegionStat[]>(fallbackRegions);
@@ -204,6 +232,11 @@ function YandexMap() {
           controls: []
         });
 
+        const clusterer = new ymaps.Clusterer({
+          preset: "islands#blueClusterIcons",
+          groupByCoordinates: false
+        });
+
         const resolvedMarkers = (
           await Promise.all(
             regions.map(async (region): Promise<MapMarker | null> => {
@@ -250,8 +283,8 @@ function YandexMap() {
           )
         ).filter((marker): marker is MapMarker => marker !== null);
 
-        resolvedMarkers.forEach((marker) => {
-          mapInstance.geoObjects.add(
+        const placemarks = resolvedMarkers.map(
+          (marker) =>
             new ymaps.Placemark(
               marker.coords,
               {
@@ -260,8 +293,11 @@ function YandexMap() {
               },
               { preset: "islands#blueCircleDotIconWithCaption" }
             )
-          );
-        });
+        );
+        clusterer.add(placemarks);
+        mapInstance.geoObjects.add(clusterer);
+
+        await fitMapToRussia(mapInstance, ymaps);
 
         mapInstanceRef.current = mapInstance;
       });
@@ -295,9 +331,18 @@ function YandexMap() {
     const handleFullscreenChange = () => {
       const active = Boolean(document.fullscreenElement);
       setIsFullscreen(active);
-      if (active && mapInstanceRef.current?.container?.fitToViewport) {
-        setTimeout(() => mapInstanceRef.current.container.fitToViewport(), 0);
-      }
+
+      setTimeout(async () => {
+        const mapInstance = mapInstanceRef.current;
+        const ymaps = (window as any).ymaps;
+        if (!mapInstance) return;
+
+        if (mapInstance.container?.fitToViewport) {
+          mapInstance.container.fitToViewport();
+        }
+
+        await fitMapToRussia(mapInstance, ymaps);
+      }, 100);
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
