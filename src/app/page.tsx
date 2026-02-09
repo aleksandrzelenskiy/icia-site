@@ -156,6 +156,8 @@ const RUSSIA_BOUNDS_FALLBACK: [[number, number], [number, number]] = [
   [41.185353, 19.6389],
   [81.857361, 180]
 ];
+const RED_LOCATION_MARKER_ICON =
+  "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27%23ef4444%27%3E%3Cpath%20d%3D%27M12%202.25a7.75%207.75%200%2000-7.75%207.75c0%205.63%206.47%2011.22%207.05%2011.7a1.1%201.1%200%20001.4%200c.58-.48%207.05-6.07%207.05-11.7A7.75%207.75%200%200012%202.25zm0%2010.5a2.75%202.75%200%20110-5.5%202.75%202.75%200%20010%205.5z%27/%3E%3C/svg%3E";
 
 async function fitMapToRussia(mapInstance: any, ymaps: any) {
   if (!mapInstance || !ymaps) return;
@@ -288,10 +290,14 @@ function YandexMap() {
             new ymaps.Placemark(
               marker.coords,
               {
-                iconCaption: `${marker.count}`,
                 balloonContent: `${marker.label}: ${marker.count} пользователей`
               },
-              { preset: "islands#blueCircleDotIconWithCaption" }
+              {
+                iconLayout: "default#image",
+                iconImageHref: RED_LOCATION_MARKER_ICON,
+                iconImageSize: [30, 42],
+                iconImageOffset: [-15, -42]
+              }
             )
         );
         clusterer.add(placemarks);
