@@ -145,6 +145,12 @@ const fallbackRegions: RegionStat[] = [
 ];
 const contractorOverlayImageClass = "w-full rounded-lg object-cover";
 const regionGeocodeCache = new Map<string, [number, number]>();
+const regionCoordsByCode = new Map<string, [number, number]>([
+  ["23", [45.0355, 38.9753]], // Краснодар
+  ["38", [52.2869, 104.3050]], // Иркутск
+  ["77", [55.7558, 37.6176]], // Москва
+  ["78", [59.9343, 30.3351]] // Санкт-Петербург
+]);
 
 function YandexMap() {
   const [regions, setRegions] = useState<RegionStat[]>(fallbackRegions);
@@ -201,6 +207,17 @@ function YandexMap() {
         const resolvedMarkers = (
           await Promise.all(
             regions.map(async (region): Promise<MapMarker | null> => {
+              const predefinedCoords = regionCoordsByCode.get(region.regionCode);
+              if (predefinedCoords) {
+                regionGeocodeCache.set(region.regionCode, predefinedCoords);
+                return {
+                  coords: predefinedCoords,
+                  label: region.label,
+                  count: region.count,
+                  regionCode: region.regionCode
+                };
+              }
+
               const cachedCoords = regionGeocodeCache.get(region.regionCode);
               if (cachedCoords) {
                 return {
