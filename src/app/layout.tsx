@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className="light" suppressHydrationWarning>
+    <html lang="ru" className="dark" suppressHydrationWarning>
       <head>
         <title>ICIA - Industrial Cellular Installer Association</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
