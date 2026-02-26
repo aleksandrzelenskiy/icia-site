@@ -997,16 +997,18 @@ export default function Home() {
             <h2 className="text-3xl font-semibold sm:text-4xl">
               Приложение ICIA для всех участников
             </h2>
-            <div className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
+            <div className="flex w-full items-stretch gap-2 rounded-2xl border border-black/5 bg-white/70 p-2 sm:w-auto sm:items-center sm:gap-3 dark:border-white/10 dark:bg-white/5">
               <Button
                 variant={audience === "contractor" ? "default" : "ghost"}
                 onClick={() => setAudience("contractor")}
+                className="h-auto min-w-0 flex-1 basis-0 whitespace-normal px-3 py-2 text-center leading-tight sm:flex-none sm:basis-auto sm:whitespace-nowrap"
               >
                 Для подрядчика
               </Button>
               <Button
                 variant={audience === "specialist" ? "default" : "ghost"}
                 onClick={() => setAudience("specialist")}
+                className="h-auto min-w-0 flex-1 basis-0 whitespace-normal px-3 py-2 text-center leading-tight sm:flex-none sm:basis-auto sm:whitespace-nowrap"
               >
                 Для исполнителя
               </Button>
