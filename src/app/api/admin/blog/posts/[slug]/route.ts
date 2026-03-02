@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import { getBlogPostRawBySlug, saveBlogPostRaw } from "@/lib/blog-fs";
 
@@ -35,6 +36,9 @@ export async function PUT(request: Request, { params }: Params) {
 
   try {
     await saveBlogPostRaw(slug, content);
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${slug}`);
+    revalidatePath("/");
     return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to save";

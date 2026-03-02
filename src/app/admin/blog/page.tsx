@@ -29,6 +29,9 @@ export default function AdminBlogPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState("");
 
   const selectedPost = useMemo(
     () => posts.find((post) => post.slug === selectedSlug) ?? null,
@@ -41,7 +44,10 @@ export default function AdminBlogPage() {
     try {
       const response = await fetch("/api/admin/blog/posts");
       const data = (await response.json()) as AdminPostsResponse;
-      if (!response.ok) throw new Error(data.error || "Не удалось загрузить список");
+      if (!response.ok) {
+        setStatus(data.error || "Не удалось загрузить список");
+        return;
+      }
       setPosts(Array.isArray(data.posts) ? data.posts : []);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось загрузить список");
@@ -56,7 +62,10 @@ export default function AdminBlogPage() {
     try {
       const response = await fetch(`/api/admin/blog/posts/${slug}`);
       const data = (await response.json()) as AdminPostResponse;
-      if (!response.ok) throw new Error(data.error || "Не удалось загрузить пост");
+      if (!response.ok) {
+        setStatus(data.error || "Не удалось загрузить пост");
+        return;
+      }
       setSelectedSlug(slug);
       setEditor(data.content ?? "");
     } catch (error) {
@@ -82,7 +91,10 @@ export default function AdminBlogPage() {
         body: JSON.stringify({ slug })
       });
       const data = (await response.json()) as AdminPostResponse;
-      if (!response.ok) throw new Error(data.error || "Не удалось создать пост");
+      if (!response.ok) {
+        setStatus(data.error || "Не удалось создать пост");
+        return;
+      }
 
       setEditor(data.content ?? "");
       setSelectedSlug(data.slug ?? slug);
@@ -115,7 +127,10 @@ export default function AdminBlogPage() {
         body: JSON.stringify({ content: editor })
       });
       const data = (await response.json()) as { ok?: boolean; error?: string };
-      if (!response.ok) throw new Error(data.error || "Не удалось сохранить пост");
+      if (!response.ok) {
+        setStatus(data.error || "Не удалось сохранить пост");
+        return;
+      }
       await loadPosts();
       setStatus("Пост сохранен");
     } catch (error) {
@@ -153,18 +168,43 @@ export default function AdminBlogPage() {
     return lines.join("\n");
   };
 
+  const getCoverImageFromFrontmatter = (content: string) => {
+    const normalized = content.replace(/\r\n/g, "\n");
+    const lines = normalized.split("\n");
+    if (lines[0] !== "---") return "";
+    const endIndex = lines.indexOf("---", 1);
+    if (endIndex === -1) return "";
+
+    for (let i = 1; i < endIndex; i += 1) {
+      const line = lines[i].trim();
+      if (!line.startsWith("coverImage:")) continue;
+      const value = line.slice("coverImage:".length).trim();
+      if (!value) return "";
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        return value.slice(1, -1);
+      }
+      return value;
+    }
+    return "";
+  };
+
   const uploadCoverImage = async () => {
+    setUploadError("");
+    setUploadSuccess("");
+
     if (!coverFile) {
-      setStatus("Выберите файл изображения");
+      setUploadError("Выберите файл изображения");
       return;
     }
     if (!editor.trim()) {
-      setStatus("Сначала откройте пост");
+      setUploadError("Сначала откройте пост");
       return;
     }
 
     setUploadingImage(true);
-    setStatus("");
     try {
       const payload = new FormData();
       payload.append("file", coverFile);
@@ -175,20 +215,26 @@ export default function AdminBlogPage() {
       });
       const data = (await response.json()) as { url?: string; error?: string };
       if (!response.ok || !data.url) {
-        throw new Error(data.error || "Не удалось загрузить изображение");
+        setUploadError(data.error || "Не удалось загрузить изображение");
+        return;
       }
 
       setEditor((prev) => replaceCoverImageInFrontmatter(prev, data.url as string));
       setCoverFile(null);
-      setStatus(`Изображение загружено: ${data.url}`);
+      setCoverPreviewUrl(data.url);
+      setUploadSuccess(`Изображение загружено: ${data.url}`);
     } catch (error) {
-      setStatus(
+      setUploadError(
         error instanceof Error ? error.message : "Не удалось загрузить изображение"
       );
     } finally {
       setUploadingImage(false);
     }
   };
+
+  useEffect(() => {
+    setCoverPreviewUrl(getCoverImageFromFrontmatter(editor));
+  }, [editor]);
 
   useEffect(() => {
     loadPosts();
@@ -270,10 +316,12 @@ export default function AdminBlogPage() {
         <div className="mb-4 grid gap-3 rounded-xl border border-black/10 p-3 dark:border-white/10 md:grid-cols-[1fr_auto]">
           <Input
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept="image/*"
             onChange={(event) => {
               const file = event.target.files?.[0] ?? null;
               setCoverFile(file);
+              setUploadError("");
+              setUploadSuccess("");
             }}
           />
           <Button
@@ -284,6 +332,31 @@ export default function AdminBlogPage() {
           >
             {uploadingImage ? "Загрузка..." : "Загрузить обложку"}
           </Button>
+          {coverFile && (
+            <p className="md:col-span-2 text-xs text-mutedForeground">
+              Выбран файл: {coverFile.name}
+            </p>
+          )}
+          {uploadError && (
+            <p className="md:col-span-2 text-sm font-medium text-red-500">
+              {uploadError}
+            </p>
+          )}
+          {uploadSuccess && (
+            <p className="md:col-span-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+              {uploadSuccess}
+            </p>
+          )}
+          {coverPreviewUrl && (
+            <div className="md:col-span-2">
+              <p className="mb-2 text-xs text-mutedForeground">Текущая обложка:</p>
+              <img
+                src={coverPreviewUrl}
+                alt="Превью обложки"
+                className="h-36 w-full max-w-md rounded-lg object-cover border border-black/10 dark:border-white/10"
+              />
+            </div>
+          )}
         </div>
 
         <Textarea

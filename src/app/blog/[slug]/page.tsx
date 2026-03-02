@@ -6,16 +6,13 @@ import { notFound } from "next/navigation";
 import MarkdownContent from "@/components/blog/MarkdownContent";
 import BlogSiteHeader from "@/components/layout/BlogSiteHeader";
 import { formatDate } from "@/lib/blog";
-import { getBlogPostBySlug, getBlogPosts } from "@/lib/blog-data";
+import { getBlogPostBySlug } from "@/lib/blog-data";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateStaticParams() {
-  const posts = await getBlogPosts();
-  return posts.map((post) => ({ slug: post.slug }));
-}
 
 export async function generateMetadata({
   params

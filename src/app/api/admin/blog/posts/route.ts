@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import { createBlogPostDraft, listBlogPostSummaries } from "@/lib/blog-fs";
 
@@ -24,6 +25,8 @@ export async function POST(request: Request) {
 
   try {
     const post = await createBlogPostDraft(slug);
+    revalidatePath("/blog");
+    revalidatePath("/");
     return NextResponse.json(post, { status: 201 });
   } catch (error) {
     const message =
