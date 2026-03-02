@@ -7,6 +7,7 @@ import MarkdownContent from "@/components/blog/MarkdownContent";
 import BlogSiteHeader from "@/components/layout/BlogSiteHeader";
 import { formatDate } from "@/lib/blog";
 import { getBlogPostBySlug } from "@/lib/blog-data";
+import { isPublicBlogEnabled } from "@/lib/feature-flags";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,10 @@ type PageProps = {
 export async function generateMetadata({
   params
 }: PageProps): Promise<Metadata> {
+  if (!isPublicBlogEnabled()) {
+    return {};
+  }
+
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
 
@@ -46,6 +51,10 @@ export async function generateMetadata({
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
+  if (!isPublicBlogEnabled()) {
+    notFound();
+  }
+
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
 
