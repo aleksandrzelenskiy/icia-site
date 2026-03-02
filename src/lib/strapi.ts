@@ -41,8 +41,8 @@ const STRAPI_BLOG_COLLECTION = process.env.STRAPI_BLOG_COLLECTION || "posts";
 
 const isStrapiConfigured = () => Boolean(STRAPI_URL);
 
-const getStrapiHeaders = () => {
-  if (!STRAPI_TOKEN) return {};
+const getStrapiHeaders = (): HeadersInit | undefined => {
+  if (!STRAPI_TOKEN) return undefined;
   return { Authorization: `Bearer ${STRAPI_TOKEN}` };
 };
 
