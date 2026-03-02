@@ -420,7 +420,7 @@ function YandexMap() {
   return (
     <div
       ref={mapContainerRef}
-      className="glass relative h-[420px] w-full max-w-full min-w-0 overflow-hidden rounded-2xl"
+      className="glass relative h-[420px] w-full max-w-full min-w-0 overflow-hidden rounded-none sm:rounded-2xl"
     >
       <div id="icia-map" className="h-full w-full" />
       <button
@@ -1019,7 +1019,7 @@ export default function Home() {
             </Button>
           </div>
         </motion.div>
-        <motion.div className="relative" variants={fadeUp}>
+        <motion.div className="relative -mx-6 sm:mx-0" variants={fadeUp}>
           <YandexMap />
         </motion.div>
       </motion.section>
