@@ -28,7 +28,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { formatDate, type BlogPost } from "@/lib/blog";
 import { getRegionLabelByCode, normalizeRegionCode } from "@/lib/regions";
 
 const fadeUp = {
@@ -480,7 +479,6 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [blogPreview, setBlogPreview] = useState<BlogPost[]>([]);
 
   const preview = useMemo(() => audienceContent[audience], [audience]);
 
@@ -534,28 +532,6 @@ export default function Home() {
     } else {
       setDocumentTheme(theme);
     }
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    const loadBlogPreview = async () => {
-      try {
-        const response = await fetch("/api/blog/preview");
-        if (!response.ok) return;
-        const data = (await response.json()) as { posts?: BlogPost[] };
-        if (active && Array.isArray(data.posts) && data.posts.length) {
-          setBlogPreview(data.posts);
-        }
-      } catch {
-        // Keep fallback data.
-      }
-    };
-
-    loadBlogPreview();
-    return () => {
-      active = false;
-    };
   }, []);
 
   useEffect(() => {
@@ -716,7 +692,6 @@ export default function Home() {
             <a href="/#about" className="transition hover:text-foreground">О ПРОЕКТЕ</a>
             <a href="/#directions" className="transition hover:text-foreground">НАПРАВЛЕНИЯ</a>
             <a href="/#platform" className="transition hover:text-foreground">ПРИЛОЖЕНИЕ</a>
-            <a href="/#blog" className="transition hover:text-foreground">БЛОГ</a>
             <a href="/#contact" className="transition hover:text-foreground">КОНТАКТЫ</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -788,7 +763,6 @@ export default function Home() {
                 <a href="/#about" onClick={() => setMenuOpen(false)}>О ПРОЕКТЕ</a>
                 <a href="/#directions" onClick={() => setMenuOpen(false)}>НАПРАВЛЕНИЯ</a>
                 <a href="/#platform" onClick={() => setMenuOpen(false)}>ПРИЛОЖЕНИЕ</a>
-                <a href="/#blog" onClick={() => setMenuOpen(false)}>БЛОГ</a>
                 <a href="/#contact" onClick={() => setMenuOpen(false)}>КОНТАКТЫ</a>
               </div>
               <div className="mt-6">
@@ -1392,76 +1366,6 @@ export default function Home() {
         </motion.div>
       </motion.section>
       <motion.section
-        id="blog"
-        className="mx-auto w-full max-w-6xl px-6 py-24"
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={stagger}
-      >
-        <motion.div
-          className="flex flex-wrap items-end justify-between gap-6"
-          variants={fadeUp}
-        >
-          <div className="max-w-2xl space-y-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-mutedForeground">
-              Блог ICIA
-            </p>
-            <h2 className="text-3xl font-semibold sm:text-4xl">
-              Практика, стандарты и новости отрасли
-            </h2>
-            <p className="text-mutedForeground">
-              Делимся кейсами, методичками и обновлениями, чтобы подрядчики и
-              исполнители работали быстрее и качественнее.
-            </p>
-          </div>
-          <Button asChild size="lg">
-            <a href="/blog">Смотреть все статьи</a>
-          </Button>
-        </motion.div>
-        <motion.div
-          className="mt-10 grid gap-6 md:grid-cols-3"
-          variants={stagger}
-        >
-          {blogPreview.map((post) => (
-            <motion.article
-              key={post.slug}
-              className="glass flex h-full flex-col justify-between rounded-2xl p-6"
-              variants={fadeUp}
-              whileHover={{ y: -6 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-            >
-              <div className="space-y-3">
-                <div className="relative mb-4 h-40 overflow-hidden rounded-xl">
-                  <Image
-                    src={post.coverImage}
-                    alt={post.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-mutedForeground">
-                  <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-semibold text-foreground dark:border-white/10">
-                    {post.category}
-                  </span>
-                  <span>{formatDate(post.date)}</span>
-                  <span>{post.readTime}</span>
-                </div>
-                <h3 className="text-xl font-semibold">{post.title}</h3>
-                <p className="text-sm text-mutedForeground">{post.excerpt}</p>
-              </div>
-              <a
-                href={`/blog/${post.slug}`}
-                className="mt-6 inline-flex items-center text-sm font-semibold text-primary"
-              >
-                Читать статью →
-              </a>
-            </motion.article>
-          ))}
-        </motion.div>
-      </motion.section>
-      <motion.section
         id="contact"
         className="mx-auto w-full max-w-5xl px-6 py-24"
         initial="hidden"
@@ -1593,7 +1497,6 @@ export default function Home() {
             <p className="text-xs uppercase tracking-[0.2em]">Меню</p>
             <a href="/#about" className="block hover:text-foreground">О проекте</a>
             <a href="/#platform" className="block hover:text-foreground">Приложение</a>
-            <a href="/#blog" className="block hover:text-foreground">Блог</a>
             <a href="/#contact" className="block hover:text-foreground">Контакты</a>
           </div>
           <div className="space-y-3 text-sm text-mutedForeground">
