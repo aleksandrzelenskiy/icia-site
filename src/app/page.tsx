@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { blogPosts, formatDate, type BlogPost } from "@/lib/blog";
+import { formatDate, type BlogPost } from "@/lib/blog";
 import { getRegionLabelByCode, normalizeRegionCode } from "@/lib/regions";
 
 const fadeUp = {
@@ -480,9 +480,7 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [blogPreview, setBlogPreview] = useState<BlogPost[]>(
-    blogPosts.slice(0, 3)
-  );
+  const [blogPreview, setBlogPreview] = useState<BlogPost[]>([]);
 
   const preview = useMemo(() => audienceContent[audience], [audience]);
 
@@ -1434,6 +1432,15 @@ export default function Home() {
               transition={{ duration: 0.25, ease: "easeOut" }}
             >
               <div className="space-y-3">
+                <div className="relative mb-4 h-40 overflow-hidden rounded-xl">
+                  <Image
+                    src={post.coverImage}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-mutedForeground">
                   <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-semibold text-foreground dark:border-white/10">
                     {post.category}

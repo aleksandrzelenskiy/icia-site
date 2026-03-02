@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import MarkdownContent from "@/components/blog/MarkdownContent";
 import { formatDate } from "@/lib/blog";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/blog-data";
 
@@ -84,45 +86,18 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="mt-10 space-y-6 text-[17px] leading-relaxed text-foreground">
-        {post.content.map((block, index) => {
-          if (block.type === "h3") {
-            return (
-              <h2 key={index} className="text-2xl font-semibold">
-                {block.text}
-              </h2>
-            );
-          }
+      <div className="relative mt-10 h-[280px] overflow-hidden rounded-2xl sm:h-[360px]">
+        <Image
+          src={post.coverImage}
+          alt={post.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 768px"
+        />
+      </div>
 
-          if (block.type === "ul") {
-            return (
-              <ul key={index} className="space-y-2 pl-5 text-mutedForeground">
-                {block.items.map((item) => (
-                  <li key={item} className="list-disc">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            );
-          }
-
-          if (block.type === "quote") {
-            return (
-              <blockquote
-                key={index}
-                className="border-l-2 border-primary/60 pl-4 text-lg font-semibold text-foreground"
-              >
-                {block.text}
-              </blockquote>
-            );
-          }
-
-          return (
-            <p key={index} className="text-mutedForeground">
-              {block.text}
-            </p>
-          );
-        })}
+      <div className="mt-10">
+        <MarkdownContent content={post.content} />
       </div>
     </div>
   );

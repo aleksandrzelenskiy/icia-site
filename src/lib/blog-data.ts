@@ -1,13 +1,6 @@
-import { blogPosts as fallbackPosts } from "@/lib/blog";
-import { fetchStrapiPostBySlug, fetchStrapiPosts } from "@/lib/strapi";
+import { getAllBlogPosts, getBlogPostBySlugFromFs } from "@/lib/blog-fs";
 
-export const getBlogPosts = async () => {
-  const posts = await fetchStrapiPosts();
-  return posts && posts.length ? posts : fallbackPosts;
-};
+export const getBlogPosts = async () => getAllBlogPosts();
 
-export const getBlogPostBySlug = async (slug: string) => {
-  const post = await fetchStrapiPostBySlug(slug);
-  if (post) return post;
-  return fallbackPosts.find((item) => item.slug === slug) ?? null;
-};
+export const getBlogPostBySlug = async (slug: string) =>
+  getBlogPostBySlugFromFs(slug);

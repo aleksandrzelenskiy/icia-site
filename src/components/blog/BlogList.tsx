@@ -1,22 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Input } from "@/components/ui/input";
-import { BlogPost, formatDate } from "@/lib/blog";
+import { BLOG_CATEGORIES, BlogPost, formatDate, markdownToPlainText } from "@/lib/blog";
 
 type BlogListProps = {
   posts: BlogPost[];
 };
 
-const getContentText = (post: BlogPost) =>
-  post.content
-    .map((block) => {
-      if (block.type === "ul") return block.items.join(" ");
-      return block.text;
-    })
-    .join(" ");
+const getContentText = (post: BlogPost) => markdownToPlainText(post.content);
 
 export default function BlogList({ posts }: BlogListProps) {
   const [search, setSearch] = useState("");
@@ -24,9 +19,8 @@ export default function BlogList({ posts }: BlogListProps) {
   const [activeTag, setActiveTag] = useState("Все");
 
   const categories = useMemo(() => {
-    const set = new Set(posts.map((post) => post.category).filter(Boolean));
-    return ["Все", ...Array.from(set)];
-  }, [posts]);
+    return ["Все", ...BLOG_CATEGORIES];
+  }, []);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -123,6 +117,15 @@ export default function BlogList({ posts }: BlogListProps) {
             className="glass flex h-full flex-col justify-between rounded-2xl p-6"
           >
             <div className="space-y-3">
+              <div className="relative mb-4 h-44 overflow-hidden rounded-xl">
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
               <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-mutedForeground">
                 <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-semibold text-foreground dark:border-white/10">
                   {post.category}
