@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
+import { isAdminRequestAuthorized } from "@/lib/admin-auth";
 import { createBlogPostDraft, listBlogPostSummaries } from "@/lib/blog-fs";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!isAdminRequestAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const posts = await listBlogPostSummaries();
   return NextResponse.json({ posts });
 }
 
 export async function POST(request: Request) {
+  if (!isAdminRequestAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const payload = (await request.json().catch(() => null)) as
     | { slug?: string }
     | null;

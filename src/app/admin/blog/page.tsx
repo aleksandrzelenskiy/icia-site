@@ -140,6 +140,14 @@ export default function AdminBlogPage() {
     }
   };
 
+  const logout = async () => {
+    try {
+      await fetch("/api/admin/auth/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/admin/login";
+    }
+  };
+
   const replaceCoverImageInFrontmatter = (content: string, imageUrl: string) => {
     const normalized = content.replace(/\r\n/g, "\n");
     const lines = normalized.split("\n");
@@ -308,9 +316,14 @@ export default function AdminBlogPage() {
               {selectedSlug ? `slug: ${selectedSlug}` : "Выберите пост слева"}
             </p>
           </div>
-          <Button type="button" onClick={saveCurrent} disabled={saving || loadingPost}>
-            Сохранить
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" onClick={logout}>
+              Выйти
+            </Button>
+            <Button type="button" onClick={saveCurrent} disabled={saving || loadingPost}>
+              Сохранить
+            </Button>
+          </div>
         </div>
 
         <div className="mb-4 grid gap-3 rounded-xl border border-black/10 p-3 dark:border-white/10 md:grid-cols-[1fr_auto]">

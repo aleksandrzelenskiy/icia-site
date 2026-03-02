@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
+import { isAdminRequestAuthorized } from "@/lib/admin-auth";
 import { getBlogPostRawBySlug, saveBlogPostRaw } from "@/lib/blog-fs";
 
 export const runtime = "nodejs";
@@ -9,7 +10,10 @@ type Params = {
   params: Promise<{ slug: string }>;
 };
 
-export async function GET(_: Request, { params }: Params) {
+export async function GET(request: Request, { params }: Params) {
+  if (!isAdminRequestAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { slug } = await params;
   const content = await getBlogPostRawBySlug(slug);
 
@@ -21,6 +25,9 @@ export async function GET(_: Request, { params }: Params) {
 }
 
 export async function PUT(request: Request, { params }: Params) {
+  if (!isAdminRequestAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { slug } = await params;
   const payload = (await request.json().catch(() => null)) as
     | { content?: string }

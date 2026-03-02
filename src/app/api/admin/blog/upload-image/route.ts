@@ -4,6 +4,8 @@ import path from "node:path";
 
 import { NextResponse } from "next/server";
 
+import { isAdminRequestAuthorized } from "@/lib/admin-auth";
+
 export const runtime = "nodejs";
 
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
@@ -28,6 +30,10 @@ const safeFileName = (name: string) =>
     .replace(/^-|-$/g, "");
 
 export async function POST(request: Request) {
+  if (!isAdminRequestAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const formData = await request.formData();
   const file = formData.get("file");
 
