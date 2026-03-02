@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
 
-import { getRegionLabelByCode } from "@/lib/regions";
+import { getRegionLabelByCode, normalizeRegionCode } from "@/lib/regions";
 
 type RegionStat = {
   regionCode: string;
@@ -39,44 +39,11 @@ const toPositiveInt = (value: unknown): number | null => {
   return null;
 };
 
-const toRegionCode = (value: unknown): string | null => {
-  if (typeof value !== "string" && typeof value !== "number") return null;
-  const raw = String(value).trim();
-  if (!raw) return null;
-  return raw.padStart(2, "0");
-};
-
-const parseRegionArray = (input: unknown): RegionStat[] => {
-  if (!Array.isArray(input)) return [];
-
-  return input
-    .map((item) => {
-      if (!item || typeof item !== "object") return null;
-      const record = item as RegionInput;
-      const regionCode = toRegionCode(record.regionCode ?? record.code);
-      if (!regionCode) return null;
-
-      const count =
-        toPositiveInt(record.count) ?? toPositiveInt(record.users) ?? 1;
-      const label = getRegionLabelByCode(regionCode);
-      if (!label) return null;
-
-      return { regionCode, label, count };
-    })
-    .filter((item): item is RegionStat => item !== null)
-    .slice(0, MAX_REGIONS);
-};
-
-const aggregateUsersByRegion = (usersPayload: unknown): RegionStat[] => {
-  if (!Array.isArray(usersPayload)) return [];
+const mergeRegionStats = (items: RegionStat[]): RegionStat[] => {
   const byCode = new Map<string, number>();
 
-  for (const user of usersPayload) {
-    if (!user || typeof user !== "object") continue;
-    const record = user as Record<string, unknown>;
-    const regionCode = toRegionCode(record.regionCode);
-    if (!regionCode) continue;
-    byCode.set(regionCode, (byCode.get(regionCode) ?? 0) + 1);
+  for (const item of items) {
+    byCode.set(item.regionCode, (byCode.get(item.regionCode) ?? 0) + item.count);
   }
 
   return Array.from(byCode.entries())
@@ -86,7 +53,53 @@ const aggregateUsersByRegion = (usersPayload: unknown): RegionStat[] => {
       return { regionCode, label, count };
     })
     .filter((item): item is RegionStat => item !== null)
+    .sort((a, b) => b.count - a.count)
     .slice(0, MAX_REGIONS);
+};
+
+const parseRegionArray = (input: unknown): RegionStat[] => {
+  if (!Array.isArray(input)) return [];
+
+  const normalized = input
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const record = item as RegionInput;
+      const regionCode = normalizeRegionCode(record.regionCode ?? record.code);
+      if (!regionCode) return null;
+
+      const count =
+        toPositiveInt(record.count) ?? toPositiveInt(record.users) ?? 1;
+      const label = getRegionLabelByCode(regionCode);
+      if (!label) return null;
+
+      return { regionCode, label, count };
+    })
+    .filter((item): item is RegionStat => item !== null);
+
+  return mergeRegionStats(normalized);
+};
+
+const aggregateUsersByRegion = (usersPayload: unknown): RegionStat[] => {
+  if (!Array.isArray(usersPayload)) return [];
+  const byCode = new Map<string, number>();
+
+  for (const user of usersPayload) {
+    if (!user || typeof user !== "object") continue;
+    const record = user as Record<string, unknown>;
+    const regionCode = normalizeRegionCode(record.regionCode);
+    if (!regionCode) continue;
+    byCode.set(regionCode, (byCode.get(regionCode) ?? 0) + 1);
+  }
+
+  const normalized = Array.from(byCode.entries())
+    .map(([regionCode, count]) => {
+      const label = getRegionLabelByCode(regionCode);
+      if (!label) return null;
+      return { regionCode, label, count };
+    })
+    .filter((item): item is RegionStat => item !== null);
+
+  return mergeRegionStats(normalized);
 };
 
 const parseUpstreamPayload = (payload: unknown): RegionStat[] => {
@@ -129,8 +142,15 @@ const fetchRegionsFromMongo = async (): Promise<RegionStat[]> => {
           }
         }
       },
-      { $match: { regionCodeStr: { $regex: "^[0-9]{1,2}$" } } },
-      { $group: { _id: "$regionCodeStr", count: { $sum: 1 } } },
+      { $match: { regionCodeStr: { $regex: "^[0-9]+$" } } },
+      {
+        $project: {
+          regionCode: {
+            $substrCP: [{ $concat: ["0", "$regionCodeStr"] }, -2, 2]
+          }
+        }
+      },
+      { $group: { _id: "$regionCode", count: { $sum: 1 } } },
       { $project: { _id: 0, regionCode: "$_id", count: 1 } },
       { $sort: { count: -1 } },
       { $limit: MAX_REGIONS }

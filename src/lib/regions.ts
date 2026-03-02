@@ -92,7 +92,29 @@ const NUMERIC_REGION_DATA: ReadonlyArray<RegionOption> = [
 
 const REGION_MAP = new Map(NUMERIC_REGION_DATA.map((item) => [item.code, item]));
 
-export const getRegionLabelByCode = (code: string): string | null => {
-  const normalized = code.padStart(2, "0");
+export const normalizeRegionCode = (value: unknown): string | null => {
+  if (typeof value === "number") {
+    if (!Number.isFinite(value) || value < 0) return null;
+    const normalizedNumber = Math.trunc(value).toString();
+    return normalizedNumber.slice(-2).padStart(2, "0");
+  }
+
+  if (typeof value !== "string") return null;
+  const raw = value.trim();
+  if (!raw) return null;
+
+  const digitsOnly = /^\d+$/.test(raw)
+    ? raw
+    : /^\d+\.0+$/.test(raw)
+      ? raw.split(".")[0]
+      : null;
+  if (!digitsOnly) return null;
+
+  return digitsOnly.slice(-2).padStart(2, "0");
+};
+
+export const getRegionLabelByCode = (code: unknown): string | null => {
+  const normalized = normalizeRegionCode(code);
+  if (!normalized) return null;
   return REGION_MAP.get(normalized)?.label ?? null;
 };

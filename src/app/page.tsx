@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { blogPosts, formatDate, type BlogPost } from "@/lib/blog";
+import { getRegionLabelByCode, normalizeRegionCode } from "@/lib/regions";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -140,6 +141,12 @@ type MapMarker = {
   count: number;
   regionCode: string;
 };
+type RegionStatInput = {
+  regionCode?: unknown;
+  code?: unknown;
+  count?: unknown;
+  users?: unknown;
+};
 
 const fallbackRegions: RegionStat[] = [
   { regionCode: "38", label: "Иркутская область", count: 1 }
@@ -149,6 +156,7 @@ const regionGeocodeCache = new Map<string, [number, number]>();
 let russiaBoundsCache: [[number, number], [number, number]] | null = null;
 const regionCoordsByCode = new Map<string, [number, number]>([
   ["23", [45.0355, 38.9753]], // Краснодар
+  ["35", [59.2205, 39.8915]], // Вологда
   ["38", [52.2869, 104.3050]], // Иркутск
   ["77", [55.7558, 37.6176]], // Москва
   ["78", [59.9343, 30.3351]] // Санкт-Петербург
@@ -159,6 +167,44 @@ const RUSSIA_BOUNDS_FALLBACK: [[number, number], [number, number]] = [
 ];
 const RED_LOCATION_MARKER_ICON =
   "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27%23ef4444%27%3E%3Cpath%20d%3D%27M12%202.25a7.75%207.75%200%2000-7.75%207.75c0%205.63%206.47%2011.22%207.05%2011.7a1.1%201.1%200%20001.4%200c.58-.48%207.05-6.07%207.05-11.7A7.75%207.75%200%200012%202.25zm0%2010.5a2.75%202.75%200%20110-5.5%202.75%202.75%200%20010%205.5z%27/%3E%3C/svg%3E";
+
+const toPositiveInt = (value: unknown): number | null => {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return Math.floor(value);
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return Math.floor(parsed);
+    }
+  }
+  return null;
+};
+
+const normalizeRegionStats = (input: unknown): RegionStat[] => {
+  if (!Array.isArray(input)) return [];
+  const byCode = new Map<string, number>();
+
+  for (const item of input) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as RegionStatInput;
+    const regionCode = normalizeRegionCode(record.regionCode ?? record.code);
+    if (!regionCode) continue;
+    const label = getRegionLabelByCode(regionCode);
+    if (!label) continue;
+    const count = toPositiveInt(record.count) ?? toPositiveInt(record.users) ?? 1;
+    byCode.set(regionCode, (byCode.get(regionCode) ?? 0) + count);
+  }
+
+  return Array.from(byCode.entries())
+    .map(([regionCode, count]) => {
+      const label = getRegionLabelByCode(regionCode);
+      if (!label) return null;
+      return { regionCode, label, count };
+    })
+    .filter((item): item is RegionStat => item !== null)
+    .sort((a, b) => b.count - a.count);
+};
 
 async function fitMapToRussia(mapInstance: any, ymaps: any) {
   if (!mapInstance || !ymaps) return;
@@ -203,7 +249,7 @@ function YandexMap() {
         }
 
         const payload = await response.json();
-        const nextRegions = Array.isArray(payload?.regions) ? payload.regions : [];
+        const nextRegions = normalizeRegionStats(payload?.regions);
 
         if (!cancelled) {
           setRegions(nextRegions.length > 0 ? nextRegions : fallbackRegions);
@@ -239,20 +285,16 @@ function YandexMap() {
           controls: []
         });
 
-        const clusterer = new ymaps.Clusterer({
-          preset: "islands#blueClusterIcons",
-          groupByCoordinates: false
-        });
-
         const resolvedMarkers = (
           await Promise.all(
             regions.map(async (region): Promise<MapMarker | null> => {
+              const label = getRegionLabelByCode(region.regionCode) ?? region.label;
               const predefinedCoords = regionCoordsByCode.get(region.regionCode);
               if (predefinedCoords) {
                 regionGeocodeCache.set(region.regionCode, predefinedCoords);
                 return {
                   coords: predefinedCoords,
-                  label: region.label,
+                  label,
                   count: region.count,
                   regionCode: region.regionCode
                 };
@@ -262,14 +304,14 @@ function YandexMap() {
               if (cachedCoords) {
                 return {
                   coords: cachedCoords,
-                  label: region.label,
+                  label,
                   count: region.count,
                   regionCode: region.regionCode
                 };
               }
 
               try {
-                const geocodeResult = await ymaps.geocode(`${region.label}, Россия`, {
+                const geocodeResult = await ymaps.geocode(`${label}, Россия`, {
                   results: 1
                 });
                 const first = geocodeResult.geoObjects.get(0);
@@ -279,7 +321,7 @@ function YandexMap() {
                 regionGeocodeCache.set(region.regionCode, normalized);
                 return {
                   coords: normalized,
-                  label: region.label,
+                  label,
                   count: region.count,
                   regionCode: region.regionCode
                 };
@@ -305,8 +347,8 @@ function YandexMap() {
               }
             )
         );
-        clusterer.add(placemarks);
-        mapInstance.geoObjects.add(clusterer);
+        placemarks.forEach((placemark) => mapInstance.geoObjects.add(placemark));
+        console.info("[icia-map] regions:", regions.length, "placemarks:", placemarks.length, resolvedMarkers);
 
         await fitMapToRussia(mapInstance, ymaps);
 

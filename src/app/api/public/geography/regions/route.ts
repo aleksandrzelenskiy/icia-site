@@ -33,11 +33,21 @@ export async function GET(req: Request) {
         const db = client.db(MONGODB_DB_NAME);
 
         const regions = await db.collection("users").aggregate([
-            { $match: { regionCode: { $type: "string", $regex: "^[0-9]{1,2}$" } } },
             {
                 $project: {
-                    regionCode: { $substrCP: [{ $concat: ["0", "$regionCode"] }, -2,
-                            2] }
+                    regionCodeStr: {
+                        $trim: {
+                            input: { $toString: "$regionCode" }
+                        }
+                    }
+                }
+            },
+            { $match: { regionCodeStr: { $regex: "^[0-9]+$" } } },
+            {
+                $project: {
+                    regionCode: {
+                        $substrCP: [{ $concat: ["0", "$regionCodeStr"] }, -2, 2]
+                    }
                 }
             },
             { $group: { _id: "$regionCode", count: { $sum: 1 } } },
