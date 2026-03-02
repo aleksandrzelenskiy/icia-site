@@ -28,7 +28,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { getRegionLabelByCode, normalizeRegionCode } from "@/lib/regions";
+import {
+  getRegionCoordsByCode,
+  getRegionLabelByCode,
+  normalizeRegionCode
+} from "@/lib/regions";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -153,14 +157,6 @@ const fallbackRegions: RegionStat[] = [
 const contractorOverlayImageClass = "w-full rounded-lg object-cover";
 const regionGeocodeCache = new Map<string, [number, number]>();
 let russiaBoundsCache: [[number, number], [number, number]] | null = null;
-const regionCoordsByCode = new Map<string, [number, number]>([
-  ["03", [51.8335, 107.5841]], // Улан-Удэ (Республика Бурятия)
-  ["23", [45.0355, 38.9753]], // Краснодар
-  ["35", [59.2205, 39.8915]], // Вологда
-  ["38", [52.2869, 104.3050]], // Иркутск
-  ["77", [55.7558, 37.6176]], // Москва
-  ["78", [59.9343, 30.3351]] // Санкт-Петербург
-]);
 const RUSSIA_BOUNDS_FALLBACK: [[number, number], [number, number]] = [
   [41.185353, 19.6389],
   [81.857361, 180]
@@ -318,7 +314,7 @@ function YandexMap() {
           await Promise.all(
             regions.map(async (region): Promise<MapMarker | null> => {
               const label = getRegionLabelByCode(region.regionCode) ?? region.label;
-              const predefinedCoords = regionCoordsByCode.get(region.regionCode);
+              const predefinedCoords = getRegionCoordsByCode(region.regionCode);
               if (predefinedCoords) {
                 regionGeocodeCache.set(region.regionCode, predefinedCoords);
                 return {
@@ -910,7 +906,7 @@ export default function Home() {
           </div>
           <Button asChild size="lg">
             <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
-              Присоедениться
+              Присоединиться
             </a>
           </Button>
         </motion.div>
@@ -1137,7 +1133,7 @@ export default function Home() {
                     "Удобная сдача чертежей и документов",
                     "Коммуникация с подрядчиком в одном окне",
                     "Отслеживание статуса согласований",
-                    "Доступ к удаленнм задачам в любых регионах",
+                    "Доступ к удаленным задачам в любых регионах",
                     "Q&A: ответы коллег и экспертов по сложным кейсам"
                   ].map((item) => (
                     <li key={item} className="flex items-center gap-2">
