@@ -154,6 +154,7 @@ const contractorOverlayImageClass = "w-full rounded-lg object-cover";
 const regionGeocodeCache = new Map<string, [number, number]>();
 let russiaBoundsCache: [[number, number], [number, number]] | null = null;
 const regionCoordsByCode = new Map<string, [number, number]>([
+  ["03", [51.8335, 107.5841]], // Улан-Удэ (Республика Бурятия)
   ["23", [45.0355, 38.9753]], // Краснодар
   ["35", [59.2205, 39.8915]], // Вологда
   ["38", [52.2869, 104.3050]], // Иркутск
@@ -166,6 +167,35 @@ const RUSSIA_BOUNDS_FALLBACK: [[number, number], [number, number]] = [
 ];
 const RED_LOCATION_MARKER_ICON =
   "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27%23ef4444%27%3E%3Cpath%20d%3D%27M12%202.25a7.75%207.75%200%2000-7.75%207.75c0%205.63%206.47%2011.22%207.05%2011.7a1.1%201.1%200%20001.4%200c.58-.48%207.05-6.07%207.05-11.7A7.75%207.75%200%200012%202.25zm0%2010.5a2.75%202.75%200%20110-5.5%202.75%202.75%200%20010%205.5z%27/%3E%3C/svg%3E";
+
+const buildGeocodeQueries = (label: string): string[] => {
+  const normalized = label.trim();
+  if (!normalized) return [];
+
+  const compact = normalized
+    .replace(/\s*\(.*?\)\s*/g, " ")
+    .replace(/^Республика\s+/i, "")
+    .replace(/^г\.\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const candidates = [
+    `${normalized}, Россия`,
+    normalized,
+    compact ? `${compact}, Россия` : "",
+    compact
+  ].filter(Boolean);
+
+  return Array.from(new Set(candidates));
+};
+
+const fallbackCoordsByRegionCode = (regionCode: string): [number, number] => {
+  const numeric = Number.parseInt(regionCode, 10);
+  const seed = Number.isFinite(numeric) ? numeric : 0;
+  const lat = 43 + ((seed * 17) % 26); // 43..68
+  const lon = 30 + ((seed * 29) % 125); // 30..154
+  return [lat, lon];
+};
 
 const toPositiveInt = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isFinite(value) && value > 0) {
@@ -310,23 +340,37 @@ function YandexMap() {
               }
 
               try {
-                const geocodeResult = await ymaps.geocode(`${label}, Россия`, {
-                  results: 1
-                });
-                const first = geocodeResult.geoObjects.get(0);
-                const coords = first?.geometry?.getCoordinates?.();
-                if (!Array.isArray(coords) || coords.length !== 2) return null;
-                const normalized: [number, number] = [coords[0], coords[1]];
-                regionGeocodeCache.set(region.regionCode, normalized);
-                return {
-                  coords: normalized,
-                  label,
-                  count: region.count,
-                  regionCode: region.regionCode
-                };
+                for (const query of buildGeocodeQueries(label)) {
+                  const geocodeResult = await ymaps.geocode(query, {
+                    results: 1
+                  });
+                  const first = geocodeResult.geoObjects.get(0);
+                  const coords = first?.geometry?.getCoordinates?.();
+                  if (!Array.isArray(coords) || coords.length !== 2) {
+                    continue;
+                  }
+
+                  const normalized: [number, number] = [coords[0], coords[1]];
+                  regionGeocodeCache.set(region.regionCode, normalized);
+                  return {
+                    coords: normalized,
+                    label,
+                    count: region.count,
+                    regionCode: region.regionCode
+                  };
+                }
               } catch {
-                return null;
+                // Fall through to deterministic fallback coordinates.
               }
+
+              const fallbackCoords = fallbackCoordsByRegionCode(region.regionCode);
+              regionGeocodeCache.set(region.regionCode, fallbackCoords);
+              return {
+                coords: fallbackCoords,
+                label,
+                count: region.count,
+                regionCode: region.regionCode
+              };
             })
           )
         ).filter((marker): marker is MapMarker => marker !== null);
