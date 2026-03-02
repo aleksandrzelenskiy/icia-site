@@ -43,14 +43,7 @@ export async function GET(req: Request) {
                 }
             },
             { $match: { regionCodeStr: { $regex: "^[0-9]+$" } } },
-            {
-                $project: {
-                    regionCode: {
-                        $substrCP: [{ $concat: ["0", "$regionCodeStr"] }, -2, 2]
-                    }
-                }
-            },
-            { $group: { _id: "$regionCode", count: { $sum: 1 } } },
+            { $group: { _id: "$regionCodeStr", count: { $sum: 1 } } },
             { $project: { _id: 0, regionCode: "$_id", count: 1 } },
             { $sort: { count: -1 } }
         ]).toArray();
