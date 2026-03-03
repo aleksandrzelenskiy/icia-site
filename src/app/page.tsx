@@ -1054,7 +1054,7 @@ export default function Home() {
           <div className="mt-4">
             <Button asChild size="lg">
               <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
-                Присоедениться
+                Присоединиться
               </a>
             </Button>
           </div>
