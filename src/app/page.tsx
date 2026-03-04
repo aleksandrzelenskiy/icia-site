@@ -706,7 +706,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Head>
-        <title>ICIA — Industrial Cellular Installers Association</title>
+        <title>ICIA — Industrial Cellulars Installers Association</title>
         <meta
           name="description"
           content="ICIA объединяет подрядчиков и инженеров сотовой связи по всей России: управление проектами, аналитика и обучение."
@@ -848,7 +848,7 @@ export default function Home() {
               className="text-sm uppercase tracking-[0.2em] text-mutedForeground"
               variants={fadeUp}
             >
-              Industrial Cellular Installers Association
+              Industrial Cellulars Installers Association
             </motion.p>
             <motion.h1
               className="text-4xl font-semibold leading-tight text-foreground sm:text-6xl lg:text-7xl"
@@ -1527,7 +1527,7 @@ export default function Home() {
               ICIA
             </p>
             <p className="text-mutedForeground">
-              Industrial Cellular Installers Association
+              Industrial Cellulars Installers Association
             </p>
             <p className="text-xs text-mutedForeground">
               Политика конфиденциальности / 152-ФЗ
