@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className="dark" suppressHydrationWarning>
       <head>
-        <title>ICIA - Industrial Cellular Installer Association</title>
+        <title>ICIA - Industrial Cellular Installers Association</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
