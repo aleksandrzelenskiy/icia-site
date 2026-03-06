@@ -274,6 +274,7 @@ function YandexMap() {
   const mapInstanceRef = useRef<any>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -438,6 +439,9 @@ function YandexMap() {
     const handleFullscreenChange = () => {
       const active = Boolean(document.fullscreenElement);
       setIsFullscreen(active);
+      if (active) {
+        setIsPseudoFullscreen(false);
+      }
 
       setTimeout(async () => {
         const mapInstance = mapInstanceRef.current;
@@ -456,26 +460,73 @@ function YandexMap() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    if (isPseudoFullscreen) {
+      document.body.style.overflow = "hidden";
+    }
+
+    const timer = window.setTimeout(async () => {
+      const mapInstance = mapInstanceRef.current;
+      const ymaps = (window as any).ymaps;
+      if (!mapInstance) return;
+
+      if (mapInstance.container?.fitToViewport) {
+        mapInstance.container.fitToViewport();
+      }
+
+      await fitMapToRussia(mapInstance, ymaps);
+    }, 100);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.clearTimeout(timer);
+    };
+  }, [isPseudoFullscreen]);
+
   const toggleFullscreen = async () => {
     const container = mapContainerRef.current as any;
     if (!container) return;
+
+    if (isPseudoFullscreen) {
+      setIsPseudoFullscreen(false);
+      return;
+    }
 
     if (document.fullscreenElement) {
       await document.exitFullscreen();
       return;
     }
 
+    let enteredNativeFullscreen = false;
     if (container.requestFullscreen) {
-      await container.requestFullscreen();
+      try {
+        await container.requestFullscreen();
+        enteredNativeFullscreen = true;
+      } catch {
+        enteredNativeFullscreen = false;
+      }
     } else if (container.webkitRequestFullscreen) {
-      container.webkitRequestFullscreen();
+      try {
+        container.webkitRequestFullscreen();
+        enteredNativeFullscreen = true;
+      } catch {
+        enteredNativeFullscreen = false;
+      }
+    }
+
+    if (!enteredNativeFullscreen) {
+      setIsPseudoFullscreen(true);
     }
   };
 
   return (
     <div
       ref={mapContainerRef}
-      className="glass relative h-[360px] w-full max-w-full min-w-0 overflow-hidden rounded-none sm:h-[440px] sm:rounded-2xl lg:h-[500px]"
+      className={cn(
+        "glass relative h-[360px] w-full max-w-full min-w-0 overflow-hidden rounded-none sm:h-[440px] sm:rounded-2xl lg:h-[500px]",
+        isPseudoFullscreen && "fixed inset-0 z-[70] h-[100dvh] rounded-none"
+      )}
     >
       <div id="icia-map" className="h-full w-full" />
       <button
@@ -483,7 +534,7 @@ function YandexMap() {
         onClick={toggleFullscreen}
         className="absolute right-3 top-3 z-10 rounded-full border border-white/30 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm transition hover:bg-white"
       >
-        {isFullscreen ? "Обычный режим" : "На весь экран"}
+        {isFullscreen || isPseudoFullscreen ? "Обычный режим" : "На весь экран"}
       </button>
     </div>
   );
