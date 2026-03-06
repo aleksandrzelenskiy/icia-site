@@ -161,6 +161,8 @@ const RUSSIA_BOUNDS_FALLBACK: [[number, number], [number, number]] = [
   [41.185353, 19.6389],
   [81.857361, 180]
 ];
+const RUSSIA_MAP_CENTER: [number, number] = [61.524, 105.318];
+const RUSSIA_OVERVIEW_MAX_ZOOM = 3;
 const RED_LOCATION_MARKER_ICON =
   "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27%23ef4444%27%3E%3Cpath%20d%3D%27M12%202.25a7.75%207.75%200%2000-7.75%207.75c0%205.63%206.47%2011.22%207.05%2011.7a1.1%201.1%200%20001.4%200c.58-.48%207.05-6.07%207.05-11.7A7.75%207.75%200%200012%202.25zm0%2010.5a2.75%202.75%200%20110-5.5%202.75%202.75%200%20010%205.5z%27/%3E%3C/svg%3E";
 
@@ -249,7 +251,15 @@ async function fitMapToRussia(mapInstance: any, ymaps: any) {
 
   mapInstance.setBounds(russiaBoundsCache ?? RUSSIA_BOUNDS_FALLBACK, {
     checkZoomRange: true,
-    zoomMargin: [24, 24, 24, 24],
+    zoomMargin: [40, 24, 40, 24],
+    duration: 200
+  });
+
+  const currentZoom = mapInstance.getZoom?.();
+  if (typeof currentZoom === "number" && currentZoom > RUSSIA_OVERVIEW_MAX_ZOOM) {
+    mapInstance.setZoom(RUSSIA_OVERVIEW_MAX_ZOOM, { duration: 200 });
+  }
+  mapInstance.setCenter(RUSSIA_MAP_CENTER, mapInstance.getZoom?.() ?? RUSSIA_OVERVIEW_MAX_ZOOM, {
     duration: 200
   });
 }
@@ -305,7 +315,7 @@ function YandexMap() {
         }
 
         const mapInstance = new ymaps.Map("icia-map", {
-          center: [61.524, 105.318],
+          center: RUSSIA_MAP_CENTER,
           zoom: 3,
           controls: []
         });
@@ -460,7 +470,7 @@ function YandexMap() {
   return (
     <div
       ref={mapContainerRef}
-      className="glass relative h-[420px] w-full max-w-full min-w-0 overflow-hidden rounded-none sm:rounded-2xl"
+      className="glass relative h-[100dvh] min-h-screen w-full max-w-full min-w-0 overflow-hidden rounded-none sm:rounded-2xl"
     >
       <div id="icia-map" className="h-full w-full" />
       <button
@@ -482,7 +492,7 @@ export default function Home() {
     target: missionRef,
     offset: ["start end", "end start"]
   });
-  const missionBgYRaw = useTransform(missionProgress, [0, 1], ["-30%", "30%"]);
+  const missionBgYRaw = useTransform(missionProgress, [0, 1], ["-60%", "60%"]);
   const missionBgY = useSpring(missionBgYRaw, {
     stiffness: 90,
     damping: 26,
@@ -1029,7 +1039,7 @@ export default function Home() {
       </motion.section>
       <motion.section
         id="geography"
-        className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-24 lg:grid-cols-[1fr_1.1fr]"
+        className="mx-auto w-full max-w-6xl px-6 py-24"
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}
@@ -1059,7 +1069,7 @@ export default function Home() {
             </Button>
           </div>
         </motion.div>
-        <motion.div className="relative -mx-6 sm:mx-0" variants={fadeUp}>
+        <motion.div className="relative mt-10 -mx-6 sm:mx-0" variants={fadeUp}>
           <YandexMap />
         </motion.div>
       </motion.section>
