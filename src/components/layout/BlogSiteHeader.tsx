@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/#hero", label: "ГЛАВНАЯ" },
   { href: "/#about", label: "О ПРОЕКТЕ" },
   { href: "/#directions", label: "НАПРАВЛЕНИЯ" },
+  { href: "/#geography", label: "ГЕОГРАФИЯ" },
   { href: "/#platform", label: "ПРИЛОЖЕНИЕ" },
   { href: "/#contact", label: "КОНТАКТЫ" }
 ];

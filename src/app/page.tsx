@@ -161,8 +161,10 @@ const RUSSIA_BOUNDS_FALLBACK: [[number, number], [number, number]] = [
   [41.185353, 19.6389],
   [81.857361, 180]
 ];
-const RUSSIA_MAP_CENTER: [number, number] = [61.524, 105.318];
-const RUSSIA_OVERVIEW_MAX_ZOOM = 3;
+const RUSSIA_MAP_CENTER: [number, number] = [61.524, 99.5];
+const RUSSIA_OVERVIEW_MIN_ZOOM_MOBILE = 2.2;
+const RUSSIA_OVERVIEW_MIN_ZOOM_DESKTOP = 3.15;
+const RUSSIA_OVERVIEW_MAX_ZOOM = 4.1;
 const RED_LOCATION_MARKER_ICON =
   "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27%23ef4444%27%3E%3Cpath%20d%3D%27M12%202.25a7.75%207.75%200%2000-7.75%207.75c0%205.63%206.47%2011.22%207.05%2011.7a1.1%201.1%200%20001.4%200c.58-.48%207.05-6.07%207.05-11.7A7.75%207.75%200%200012%202.25zm0%2010.5a2.75%202.75%200%20110-5.5%202.75%202.75%200%20010%205.5z%27/%3E%3C/svg%3E";
 
@@ -249,19 +251,22 @@ async function fitMapToRussia(mapInstance: any, ymaps: any) {
     }
   }
 
-  mapInstance.setBounds(russiaBoundsCache ?? RUSSIA_BOUNDS_FALLBACK, {
+  const setBoundsResult = mapInstance.setBounds(russiaBoundsCache ?? RUSSIA_BOUNDS_FALLBACK, {
     checkZoomRange: true,
-    zoomMargin: [40, 24, 40, 24],
+    zoomMargin: typeof window !== "undefined" && window.innerWidth < 640 ? [10, 4, 10, 4] : [28, 10, 8, 10],
     duration: 200
   });
-
-  const currentZoom = mapInstance.getZoom?.();
-  if (typeof currentZoom === "number" && currentZoom > RUSSIA_OVERVIEW_MAX_ZOOM) {
-    mapInstance.setZoom(RUSSIA_OVERVIEW_MAX_ZOOM, { duration: 200 });
+  if (setBoundsResult && typeof setBoundsResult.then === "function") {
+    await setBoundsResult;
   }
-  mapInstance.setCenter(RUSSIA_MAP_CENTER, mapInstance.getZoom?.() ?? RUSSIA_OVERVIEW_MAX_ZOOM, {
-    duration: 200
-  });
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const currentZoom = mapInstance.getZoom?.();
+  if (typeof currentZoom === "number") {
+    const minZoom = isMobile ? RUSSIA_OVERVIEW_MIN_ZOOM_MOBILE : RUSSIA_OVERVIEW_MIN_ZOOM_DESKTOP;
+    const targetZoom = Math.min(Math.max(currentZoom, minZoom), RUSSIA_OVERVIEW_MAX_ZOOM);
+    mapInstance.setCenter(RUSSIA_MAP_CENTER, targetZoom, { duration: 200 });
+  }
 }
 
 function YandexMap() {
@@ -470,7 +475,7 @@ function YandexMap() {
   return (
     <div
       ref={mapContainerRef}
-      className="glass relative h-[100dvh] min-h-screen w-full max-w-full min-w-0 overflow-hidden rounded-none sm:rounded-2xl"
+      className="glass relative h-[360px] w-full max-w-full min-w-0 overflow-hidden rounded-none sm:h-[440px] sm:rounded-2xl lg:h-[500px]"
     >
       <div id="icia-map" className="h-full w-full" />
       <button
@@ -741,6 +746,7 @@ export default function Home() {
           <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 min-[900px]:flex">
             <a href="/#about" className="transition hover:text-foreground">О ПРОЕКТЕ</a>
             <a href="/#directions" className="transition hover:text-foreground">НАПРАВЛЕНИЯ</a>
+            <a href="/#geography" className="transition hover:text-foreground">ГЕОГРАФИЯ</a>
             <a href="/#platform" className="transition hover:text-foreground">ПРИЛОЖЕНИЕ</a>
             <a href="/#contact" className="transition hover:text-foreground">КОНТАКТЫ</a>
           </nav>
@@ -812,6 +818,7 @@ export default function Home() {
               <div className="mt-6 flex flex-col gap-4 text-base font-semibold text-foreground">
                 <a href="/#about" onClick={() => setMenuOpen(false)}>О ПРОЕКТЕ</a>
                 <a href="/#directions" onClick={() => setMenuOpen(false)}>НАПРАВЛЕНИЯ</a>
+                <a href="/#geography" onClick={() => setMenuOpen(false)}>ГЕОГРАФИЯ</a>
                 <a href="/#platform" onClick={() => setMenuOpen(false)}>ПРИЛОЖЕНИЕ</a>
                 <a href="/#contact" onClick={() => setMenuOpen(false)}>КОНТАКТЫ</a>
               </div>
