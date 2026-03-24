@@ -1893,7 +1893,7 @@ export default function Home() {
                       <Button
                         onClick={() => {
                           if (isLastSlide) {
-                            setIsPresentationOpen(false);
+                            window.open("https://ws.icia.pro/", "_blank", "noopener,noreferrer");
                             return;
                           }
 
@@ -1903,7 +1903,7 @@ export default function Home() {
                         }}
                         className="h-12 rounded-full px-5"
                       >
-                        {isLastSlide ? "Закрыть" : "Далее"}
+                        {isLastSlide ? "Перейти" : "Далее"}
                         {!isLastSlide && <ChevronRight className="h-4 w-4" />}
                       </Button>
                     </div>
