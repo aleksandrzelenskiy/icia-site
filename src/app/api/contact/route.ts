@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 
+import { ensureServerEnv, requiredServerEnv } from "@/lib/server-env";
+
 export const runtime = "nodejs"; // важно, чтобы не пыталось в edge
 
 type Payload = {
@@ -16,12 +18,6 @@ type RateEntry = { count: number; resetAt: number };
 const rateLimitWindowMs = 10 * 60 * 1000;
 const rateLimitMax = 5;
 const rateLimitStore = new Map<string, RateEntry>();
-
-function requiredEnv(name: string) {
-    const v = process.env[name];
-    if (!v) throw new Error(`Missing env: ${name}`);
-    return v;
-}
 
 function getClientIp(req: Request) {
     const forwardedFor = req.headers.get("x-forwarded-for");
@@ -48,6 +44,8 @@ function isRateLimited(ip: string) {
 
 export async function POST(req: Request) {
     try {
+        ensureServerEnv();
+
         const ip = getClientIp(req);
         if (isRateLimited(ip)) {
             return Response.json(
@@ -82,13 +80,13 @@ export async function POST(req: Request) {
         if (message.length > 4000)
             return Response.json({ error: "Сообщение слишком длинное" }, { status: 400 });
 
-        const host = requiredEnv("CONTACT_EMAIL_HOST");
-        const port = Number(requiredEnv("CONTACT_EMAIL_PORT"));
-        const user = requiredEnv("CONTACT_EMAIL_USER");
-        const pass = requiredEnv("CONTACT_EMAIL_PASS");
+        const host = requiredServerEnv("CONTACT_EMAIL_HOST");
+        const port = Number(requiredServerEnv("CONTACT_EMAIL_PORT"));
+        const user = requiredServerEnv("CONTACT_EMAIL_USER");
+        const pass = requiredServerEnv("CONTACT_EMAIL_PASS");
         const secure = process.env.CONTACT_EMAIL_SECURE === "true";
-        const from = requiredEnv("CONTACT_EMAIL_FROM");
-        const to = requiredEnv("CONTACT_EMAIL_TO");
+        const from = requiredServerEnv("CONTACT_EMAIL_FROM");
+        const to = requiredServerEnv("CONTACT_EMAIL_TO");
 
         const transporter = nodemailer.createTransport({
             host,
@@ -117,7 +115,8 @@ export async function POST(req: Request) {
         });
 
         return Response.json({ ok: true });
-    } catch {
+    } catch (error) {
+        console.error("Contact form submission failed", error);
         return Response.json({ error: "Ошибка отправки. Попробуйте позже." }, { status: 500 });
     }
 }

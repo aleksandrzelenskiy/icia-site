@@ -5,21 +5,64 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
-  BarChart3,
-  Camera,
+  ChevronLeft,
   ChevronRight,
-  ClipboardList,
-  GraduationCap,
   Moon,
-  ShieldCheck,
   Sun,
   X,
-  Users
 } from "lucide-react";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import AssignmentAddIcon from "@mui/icons-material/AssignmentAdd";
+import AssignmentIndOutlinedIcon from "@mui/icons-material/AssignmentIndOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import BallotOutlinedIcon from "@mui/icons-material/BallotOutlined";
+import BusinessCenterOutlinedIcon from "@mui/icons-material/BusinessCenterOutlined";
+import ChatBubbleOutlineRoundedIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
+import ChecklistRtlRoundedIcon from "@mui/icons-material/ChecklistRtlRounded";
+import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
+import DevicesIcon from "@mui/icons-material/Devices";
+import Diversity3OutlinedIcon from "@mui/icons-material/Diversity3Outlined";
+import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
+import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import LooksOneOutlinedIcon from "@mui/icons-material/LooksOneOutlined";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import RateReviewIcon from "@mui/icons-material/RateReview";
+import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
+import RocketLaunchOutlinedIcon from "@mui/icons-material/RocketLaunchOutlined";
+import SyncProblemIcon from "@mui/icons-material/SyncProblem";
+import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
+import SettingsSuggestOutlinedIcon from "@mui/icons-material/SettingsSuggestOutlined";
+import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Tooltip from "@mui/material/Tooltip";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import Stepper from "@mui/material/Stepper";
 import { AnimatePresence, motion, useScroll, useSpring, useTransform } from "framer-motion";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -85,7 +128,7 @@ const preventImageDragStart = (event: React.DragEvent) => {
 
 const audienceContent = {
   contractor: {
-    title: "Панель подрядчика",
+    title: "Подрядчикам",
     description:
       "Контроль задач, фотоотчётов и статусов работ в реальном времени. Полная прозрачность объектов и затрат.",
     bullets: [
@@ -104,38 +147,166 @@ const audienceContent = {
   }
 };
 
-const directions = [
+type PresentationSlide = {
+  id: number;
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  bullets?: string[];
+  steps?: string[];
+  note: string;
+  layout?:
+    | "hero"
+    | "list"
+    | "split-list"
+    | "stepper"
+    | "pill-list"
+    | "feature-list"
+    | "compact-list";
+};
+
+const platformPresentationSlides: PresentationSlide[] = [
   {
-    title: "Управление проектами",
-    description: "Сводные панели, SLA, контроль рисков.",
-    icon: ClipboardList
+    id: 1,
+    eyebrow: "WS ICIA",
+    title:
+      "Единая цифровая платформа для управления задачами, исполнителями, отчетностью и согласованием результатов",
+    subtitle: "От постановки задачи до приемки результата в одной системе",
+    layout: "hero",
+    note:
+      "WS ICIA помогает организации собрать в одной системе проекты, задачи, подрядчиков, фотоотчеты, документы, коммуникации и контроль выполнения."
   },
   {
-    title: "Биржа исполнителей",
-    description: "Подбор специалистов по навыкам и рейтингу.",
-    icon: Users
+    id: 2,
+    title: "Какую проблему решает платформа",
+    subtitle: "Типичные сложности в работе организаций",
+    bullets: [
+      "Задачи ведутся в нескольких каналах одновременно",
+      "Статусы и сроки требуют ручного контроля",
+      "Подрядчики и сотрудники работают в разрозненной среде",
+      "Фотоотчеты, документы и замечания хранятся в разных местах",
+      "Руководству сложно быстро увидеть полную картину по проектам и исполнению"
+    ],
+    layout: "list",
+    note:
+      "Когда процессы распределены между чатами, таблицами, почтой и папками, организация теряет скорость, прозрачность и управляемость."
   },
   {
-    title: "Фотоотчёты",
-    description: "Стандартизированные шаблоны и проверка качества.",
-    icon: Camera
+    id: 3,
+    title: "Что дает WS ICIA",
+    subtitle: "Единая рабочая среда и ключевые функциональные блоки",
+    bullets: [
+      "Проекты, задачи и исполнители в одном контуре",
+      "Контроль сроков, статусов и ответственности",
+      "Фотоотчеты и документационое согласование в системе",
+      "Замечания, исправления и приемка без потери контекста",
+      "Работа как с внутренними командами, так и с подрядчиками",
+      "История действий, роли, доступы и уведомления",
+      "Встроенные коммуникации, уведомления и административный контроль",
+      "Единая платформа вместо набора разрозненных инструментов"
+    ],
+    layout: "feature-list",
+    note:
+      "WS ICIA объединяет ключевые функциональные блоки в одной системе и превращает разрозненные процессы в единую управляемую среду."
   },
   {
-    title: "Аналитика",
-    description: "Сравнение объектов и эффективности команд.",
-    icon: BarChart3
+    id: 4,
+    title: "Как устроен процесс работы",
+    subtitle: "Сквозной сценарий в системе",
+    layout: "stepper",
+    steps: [
+      "Создается проект",
+      "Внутри проекта формируются задачи",
+      "Исполнитель назначается или откликается на задачу",
+      "Выполнение контролируется по статусам и событиям",
+      "Результат сдается через фотоотчет или документы",
+      "Ответственный сотрудник проверяет результат",
+      "При необходимости оставляет замечания",
+      "После исправлений и согласования задача закрывается"
+    ],
+    note:
+      "Важная особенность платформы в том, что весь цикл проходит внутри одной системы, без разрывов между исполнением и приемкой."
   },
   {
-    title: "Обучение",
-    description: "Модульные программы и сертификация.",
-    icon: GraduationCap
+    id: 5,
+    title: "Работа с исполнителями и подрядчиками",
+    subtitle: "Гибкая модель взаимодействия",
+    bullets: [
+      "Прямое назначение исполнителя",
+      "Внутренние конкурсы внутри организации",
+      "Публикация задач для подрядчиков",
+      "Сбор откликов и заявок в одном окне",
+      "Учет специализаций и прозрачный выбор исполнителя"
+    ],
+    layout: "list",
+    note:
+      "WS ICIA позволяет работать в одной системе и с внутренней командой, и с подрядчиками, что особенно важно при масштабировании."
   },
   {
-    title: "Ассоциация",
-    description: "Единые стандарты, Q&A и поддержка рынка.",
-    icon: ShieldCheck
+    id: 6,
+    title: "Контроль результата",
+    subtitle: "Фотоотчеты и документы как управляемый процесс",
+    bullets: [
+      "Исполнитель сдает результат в системе",
+      "Ответственный сотрудник проверяет и согласует",
+      "Замечания фиксируются структурированно",
+      "Исправления загружаются повторно без потери истории",
+      "Все материалы хранятся централизованно"
+    ],
+    layout: "feature-list",
+    note:
+      "Это делает процесс приемки прозрачным, предсказуемым и удобным как для исполнителя, так и для заказчика."
+  },
+  {
+    id: 7,
+    title: "Что получает организация",
+    subtitle: "Практический эффект от использования",
+    bullets: [
+      "Снижение операционного хаоса",
+      "Ускорение координации между участниками",
+      "Меньше ручного контроля со стороны менеджеров",
+      "Прозрачность по задачам, статусам и ответственным",
+      "Быстрее приемка и согласование результатов",
+      "Более управляемая и масштабируемая рабочая среда"
+    ],
+    layout: "split-list",
+    note:
+      "Главная ценность для организации - не просто цифровизация, а повышение управляемости процессов."
+  },
+  {
+    id: 8,
+    title: "Начать работу бесплатно",
+    subtitle: "Бесплатный пилотный период",
+    steps: [
+      "Попробуйте начать с 1-2 тестовых проектов",
+      "Подключите ключевых сотрудников и исполнителей",
+      "Протестируйте платформу на реальных кейсах",
+      "Оцените удобство, прозрачность и эффект без обязательств"
+    ],
+    layout: "stepper",
+    note:
+      "Мы готовы предложить бесплатный пилотный период, чтобы ваша команда смогла проверить WS ICIA на практике и принять решение уже на основе реального опыта работы."
   }
 ];
+
+const slideIconMap = {
+  1: DevicesIcon,
+  2: SyncProblemIcon,
+  3: TipsAndUpdatesOutlinedIcon,
+  4: Groups2OutlinedIcon,
+  5: Diversity3OutlinedIcon,
+  6: FactCheckOutlinedIcon,
+  7: TrendingUpOutlinedIcon,
+  8: RocketLaunchOutlinedIcon,
+  10: ApartmentOutlinedIcon,
+  11: ChatBubbleOutlineRoundedIcon,
+  12: VerifiedOutlinedIcon,
+  13: AutorenewRoundedIcon,
+  14: Inventory2OutlinedIcon,
+  15: SupportAgentOutlinedIcon,
+  16: ChecklistRtlRoundedIcon,
+  17: AssignmentTurnedInOutlinedIcon
+} as const;
 
 type RegionStat = { regionCode: string; label: string; count: number };
 type MapMarker = {
@@ -542,8 +713,20 @@ function YandexMap() {
 
 export default function Home() {
   const headerRef = useRef<HTMLElement | null>(null);
+  const heroRef = useRef<HTMLElement | null>(null);
   const missionRef = useRef<HTMLDivElement | null>(null);
   const platformRef = useRef<HTMLElement | null>(null);
+  const presentationContentRef = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start end", "end start"]
+  });
+  const heroBgYRaw = useTransform(heroProgress, [0, 1], ["-24%", "24%"]);
+  const heroBgY = useSpring(heroBgYRaw, {
+    stiffness: 90,
+    damping: 24,
+    mass: 0.55
+  });
   const { scrollYProgress: missionProgress } = useScroll({
     target: missionRef,
     offset: ["start end", "end start"]
@@ -585,8 +768,21 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isPresentationOpen, setIsPresentationOpen] = useState(false);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [presentationContentHeight, setPresentationContentHeight] = useState(0);
 
   const preview = useMemo(() => audienceContent[audience], [audience]);
+  const activeSlide = platformPresentationSlides[activeSlideIndex];
+  const isFirstSlide = activeSlideIndex === 0;
+  const isLastSlide = activeSlideIndex === platformPresentationSlides.length - 1;
+  const ActiveSlideIcon = slideIconMap[activeSlide.id as keyof typeof slideIconMap];
+  const bulletColumnsClass =
+    activeSlide.layout === "split-list"
+      ? "mt-8 grid gap-x-10 gap-y-4 sm:grid-cols-2"
+      : activeSlide.layout === "compact-list"
+        ? "mt-8 grid gap-x-8 gap-y-3 sm:grid-cols-2"
+        : "mt-8 space-y-4";
 
   const setDocumentTheme = (nextTheme: "dark" | "light") => {
     if (typeof document === "undefined") return;
@@ -642,8 +838,49 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof document === "undefined") return;
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-  }, [menuOpen]);
+    document.body.style.overflow = menuOpen || isPresentationOpen ? "hidden" : "";
+  }, [isPresentationOpen, menuOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isPresentationOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsPresentationOpen(false);
+        return;
+      }
+      if (event.key === "ArrowRight") {
+        setActiveSlideIndex((prev) =>
+          Math.min(prev + 1, platformPresentationSlides.length - 1)
+        );
+      }
+      if (event.key === "ArrowLeft") {
+        setActiveSlideIndex((prev) => Math.max(prev - 1, 0));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPresentationOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isPresentationOpen) return;
+
+    const updatePresentationContentHeight = () => {
+      const nextHeight = presentationContentRef.current?.offsetHeight ?? 0;
+      setPresentationContentHeight(nextHeight);
+    };
+
+    updatePresentationContentHeight();
+
+    const animationFrame = window.requestAnimationFrame(updatePresentationContentHeight);
+    window.addEventListener("resize", updatePresentationContentHeight);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("resize", updatePresentationContentHeight);
+    };
+  }, [activeSlideIndex, isPresentationOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -772,10 +1009,10 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Head>
-        <title>ICIA — Industrial Cellulars Installers Association</title>
+        <title>WS ICIA — Industrial workspace для подрядчиков, исполнителей и организаций</title>
         <meta
           name="description"
-          content="ICIA объединяет подрядчиков и инженеров сотовой связи по всей России: управление проектами, аналитика и обучение."
+          content="WS ICIA — международная цифровая платформа для управления задачами, подрядчиками, исполнителями, фотоотчетами и согласованием результатов. Развивается внутри ICIA — Industrial Cellular Installers Association."
         />
       </Head>
 
@@ -795,10 +1032,9 @@ export default function Home() {
             />
           </a>
           <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 min-[900px]:flex">
-            <a href="/#about" className="transition hover:text-foreground">О ПРОЕКТЕ</a>
-            <a href="/#directions" className="transition hover:text-foreground">НАПРАВЛЕНИЯ</a>
+            <a href="/#about" className="transition hover:text-foreground">О ПЛАТФОРМЕ</a>
             <a href="/#geography" className="transition hover:text-foreground">ГЕОГРАФИЯ</a>
-            <a href="/#platform" className="transition hover:text-foreground">ПРИЛОЖЕНИЕ</a>
+            <a href="/#platform" className="transition hover:text-foreground">ПЛАТФОРМА</a>
             <a href="/#contact" className="transition hover:text-foreground">КОНТАКТЫ</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -867,10 +1103,9 @@ export default function Home() {
                 </Button>
               </div>
               <div className="mt-6 flex flex-col gap-4 text-base font-semibold text-foreground">
-                <a href="/#about" onClick={() => setMenuOpen(false)}>О ПРОЕКТЕ</a>
-                <a href="/#directions" onClick={() => setMenuOpen(false)}>НАПРАВЛЕНИЯ</a>
+                <a href="/#about" onClick={() => setMenuOpen(false)}>О ПЛАТФОРМЕ</a>
                 <a href="/#geography" onClick={() => setMenuOpen(false)}>ГЕОГРАФИЯ</a>
-                <a href="/#platform" onClick={() => setMenuOpen(false)}>ПРИЛОЖЕНИЕ</a>
+                <a href="/#platform" onClick={() => setMenuOpen(false)}>ПЛАТФОРМА</a>
                 <a href="/#contact" onClick={() => setMenuOpen(false)}>КОНТАКТЫ</a>
               </div>
               <div className="mt-6">
@@ -890,54 +1125,71 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <section id="hero" className="relative flex h-screen items-center overflow-hidden pt-28">
-        <div className="absolute inset-0">
-          <video
-            className="h-full w-full object-cover opacity-60"
-            autoPlay
-            loop
-            muted
-            playsInline
+      <section
+        id="hero"
+        ref={heroRef}
+        className="relative isolate flex min-h-screen items-center overflow-hidden pt-28"
+      >
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <motion.div
+            className="absolute inset-x-0 -top-[16%] -bottom-[16%]"
+            style={{ y: heroBgY, willChange: "transform" }}
           >
-            <source src="/hero.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/20 to-white/0 dark:from-[#0b0d11]/70 dark:via-[#151b24]/70 dark:to-[#0c1017]" />
-          <div className="absolute inset-0 bg-hero-radial opacity-35" />
+            <div className="absolute inset-0">
+              <Image
+                src="/hero-parallax.jpg"
+                alt=""
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-center opacity-100"
+                draggable={false}
+                onContextMenu={preventImageContextMenu}
+                onDragStart={preventImageDragStart}
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.74),rgba(255,255,255,0.44)_46%,rgba(255,255,255,0.16)),radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.22),transparent_34%),linear-gradient(90deg,rgba(15,23,42,0.08),rgba(15,23,42,0.02))] dark:bg-[linear-gradient(180deg,rgba(2,6,10,0.84),rgba(4,9,14,0.66)_48%,rgba(6,12,18,0.38)),radial-gradient(circle_at_18%_22%,rgba(6,12,20,0.42),transparent_38%),linear-gradient(90deg,rgba(1,4,10,0.34),rgba(1,4,10,0.14))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.14),transparent_38%)] dark:bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.16),transparent_40%)]" />
+              <div className="absolute inset-0 bg-hero-radial opacity-24 dark:opacity-56" />
+            </div>
+          </motion.div>
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-10 px-6 text-center">
-          <motion.div
-            className="flex flex-col items-center gap-8"
-            initial="hidden"
-            animate="show"
-            variants={stagger}
-          >
-            <motion.p
-              className="text-sm uppercase tracking-[0.2em] text-mutedForeground"
-              variants={fadeUp}
+        <div className="relative z-10 flex min-h-[calc(100vh-7rem)] w-full items-center">
+          <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-10 px-6 text-center">
+            <motion.div
+              className="flex flex-col items-center gap-8"
+              initial="hidden"
+              animate="show"
+              variants={stagger}
             >
-              Industrial Cellulars Installers Association
-            </motion.p>
-            <motion.h1
-              className="text-4xl font-semibold leading-tight text-foreground sm:text-6xl lg:text-7xl"
-              variants={fadeUp}
-            >
-              Ассоциация<span className="text-gradient"> специалистов сотовой связи</span>
-            </motion.h1>
-            <motion.p
-              className="max-w-2xl text-lg text-black dark:text-mutedForeground"
-              variants={fadeUp}
-            >
-              Платформа для подрядчиков и исполнителей по всей России: единые
-              стандарты, контроль качества и аналитика работ в режиме реального
-              времени.
-            </motion.p>
-            <motion.div variants={fadeUp}>
-              <Button asChild size="xl">
-                <a href="/#about">Узнать больше <ArrowUpRight className="h-4 w-4" /></a>
-              </Button>
+              <motion.p
+                className="text-sm uppercase tracking-[0.2em] text-mutedForeground"
+                variants={fadeUp}
+              >
+                Workspace Industrial Cellular Installers Association
+              </motion.p>
+              <motion.h1
+                className="text-4xl font-semibold leading-tight text-foreground sm:text-6xl lg:text-7xl"
+                variants={fadeUp}
+              ><span className="text-gradient">Платформа для организаций и специалистов в телеком</span>
+              </motion.h1>
+              <motion.p
+                className="max-w-2xl text-lg text-black dark:text-mutedForeground"
+                variants={fadeUp}
+              >
+                Цифровая система для управления задачами, подрядчиками,
+                исполнителями, фотоотчетами, документами и приемкой результата в
+                единой рабочей среде для строителства и обслуживания объектов связи.
+              </motion.p>
+              <motion.div variants={fadeUp}>
+                <div className="flex flex-col items-center gap-3 sm:flex-row">
+                  <Button asChild size="xl">
+                    <a href="/#about">Поднобнее<ArrowUpRight className="h-4 w-4" /></a>
+                  </Button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </section>
       <motion.section
@@ -953,48 +1205,43 @@ export default function Home() {
             О проекте
           </p>
           <h2 className="text-3xl font-semibold leading-tight sm:text-4xl">
-            Кто мы?
+            Что это?
           </h2>
           <div className="space-y-4 text-base sm:text-lg lg:text-xl text-mutedForeground">
             <p>
-              ICIA объединяет подрядчиков, инженеров, операторов, проектировщиков
-              объектов связи и специалистов по монтажу сотовой инфраструктуры. Мы
-              создаём стандарт качества, цифровую платформу для управления
-              проектами и сообщество с Q&A-модулем, которое помогает рынку
-              развиваться эффективнее.
+              ICIA — Industrial Cellular Installers Association. Мы стремися объеденить специалистов развития и обслуживания телеком-отрасли в единую IT-экосистему, наша платформа опирается не только на
+              бизес-логику процессов, но и на профессиональную экспертизу рынка.
             </p>
             <p>
-              Платформа фиксирует каждую задачу, автоматизирует фотоотчёты,
-              отслеживает статус объектов и формирует аналитику для руководителей
-              проектов.
-            </p>
-            <p>
-             Будем рады видеть Вас с нами!
+              WS ICIA (Workspace) — это операционная цифровая платформа для организаций,
+              подрядчиков и исполнителей задач в телекоммуникационной отрасли. Платформа помогает вести проекты,
+              распределять задачи, контролировать сроки и принимать результаты в
+              одном рабочем контуре.
             </p>
           </div>
           <Button asChild size="lg">
-            <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
-              Присоединиться
+            <a href="/#platform">
+              Посмотреть возможности
             </a>
           </Button>
         </motion.div>
         <motion.div className="space-y-4" variants={fadeUp}>
           {[
             {
-              title: "Единые стандарты",
-              text: "Чёткие регламенты и прозрачные SLA для всех участников рынка."
+              title: "One Workspace",
+              text: "Проекты, задачи, исполнители, фотоотчеты и документы — в одной цифровой системе."
             },
             {
-              title: "Сильная команда",
-              text: "Проверенные исполнители, подтверждение квалификации, системы рейтинга и поддержка сообщества через Q&A."
+              title: "Экосистема ICIA",
+              text: "Профессиональная ассоциация формирует доверительную среду для организаций, подрядчиков и специалистов."
             },
             {
-              title: "Цифровой контроль",
-              text: "Инструменты управления задачами и контроля качества работ."
+              title: "Операционный контроль",
+              text: "Статусы, сроки, приемка результата и история действий в управляемом цифровом контуре."
             },
             {
-              title: "Монтажники и Проектировщики",
-              text: "Инженеры под любые задачи: инсталляторы и проектировщики."
+              title: "Сообщество специалистов",
+              text: "Платформа создает возможность профессиональной поддержки специалситов отралсевым сообществом"
             }
           ].map((item) => (
             <div
@@ -1034,65 +1281,18 @@ export default function Home() {
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.16),transparent_65%)]" />
           <p className="text-sm uppercase tracking-[0.2em] text-mutedForeground">
-            Наша миссия
+            Экосистема ICIA
           </p>
           <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">
-            Объединить специалистов сотовой связи по всей стране,
-            чтобы вместе строить
-            <span className="text-gradient"> качественную, надежную и современную инфраструктуру.</span>
+            WS ICIA — Workspace
+            <span className="text-gradient"> Industrial Cellular Installers Association.</span>
           </h2>
           <p className="mt-4 text-base text-mutedForeground">
-            Мы стремимся повысить качество работ, обеспечить безопасность и
-            создать среду для профессионального развития специалистов во всех регионах.
+            ICIA объединяет организации, подрядчиков и исполнителей в общей
+            профессиональной среде. WS ICIA становится рабочим инструментом этой
+            экосистемы: для задач, координации, контроля качества и
+            масштабирования процессов в строительстве и эксплуатации объектов связи.
           </p>
-        </motion.div>
-      </motion.section>
-      <motion.section
-        id="directions"
-        className="mx-auto w-full max-w-6xl px-6 py-24"
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={stagger}
-      >
-        <motion.div className="flex items-center justify-between" variants={fadeUp}>
-          <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-mutedForeground">
-              Направления
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
-              Направления деятельности ICIA
-            </h2>
-          </div>
-
-        </motion.div>
-        <motion.div
-          className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-          variants={stagger}
-        >
-          {directions.map((direction) => (
-            <motion.div
-              key={direction.title}
-              className="glass relative flex h-full flex-col gap-4 overflow-hidden rounded-2xl p-6 text-center"
-              variants={fadeUp}
-              whileHover={{ y: -6 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-            >
-              <div className="relative z-10 pt-20">
-                <p className="text-lg font-semibold">{direction.title}</p>
-                <p className="mt-2 text-sm text-mutedForeground">
-                  {direction.description}
-                </p>
-              </div>
-              <div className="pointer-events-none absolute left-1/2 top-6 flex h-20 w-20 -translate-x-1/2 items-center justify-center opacity-80">
-                <direction.icon
-                  className="h-full w-full text-primary/25"
-                  strokeWidth={0.9}
-                />
-              </div>
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white/70 to-transparent dark:from-black/60" />
-            </motion.div>
-          ))}
         </motion.div>
       </motion.section>
       <motion.section
@@ -1108,24 +1308,11 @@ export default function Home() {
             География
           </p>
           <h2 className="text-3xl font-semibold sm:text-4xl">
-            ICIA объеденяет специалистов по всей стране
+            WS ICIA создается как платформа для глобального рынка телеком-задач
           </h2>
           <p className="text-mutedForeground">
-            Мы только начинаем, но уже работаем в нескольких регионах — и
-            приглашаем специалистов и подрядчиков со всей России.
+            Уже сегодня к проекту присоеденись организации и специалисты из разных регионов России. Мы будем рады видеть Вас среди участников проекта!
           </p>
-          <p className="text-mutedForeground">
-            Наша цель — создать единую платформу для управления проектами,
-            поиска исполнителей и контроля качества от Калининграда до
-            Владивостока.
-          </p>
-          <div className="mt-4">
-            <Button asChild size="lg">
-              <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
-                Присоединиться
-              </a>
-            </Button>
-          </div>
         </motion.div>
         <motion.div className="relative mt-10 -mx-6 sm:mx-0" variants={fadeUp}>
           <YandexMap />
@@ -1146,23 +1333,25 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap items-center justify-between gap-6">
             <h2 className="text-3xl font-semibold sm:text-4xl">
-              Приложение ICIA для всех участников
+              WS ICIA для организаций, подрядчиков и исполнителей
             </h2>
-            <div className="flex w-full items-stretch gap-2 rounded-2xl border border-black/5 bg-white/70 p-2 sm:w-auto sm:items-center sm:gap-3 dark:border-white/10 dark:bg-white/5">
-              <Button
-                variant={audience === "contractor" ? "default" : "ghost"}
-                onClick={() => setAudience("contractor")}
-                className="h-auto min-w-0 flex-1 basis-0 whitespace-normal px-3 py-2 text-center leading-tight sm:flex-none sm:basis-auto sm:whitespace-nowrap"
-              >
-                Для подрядчика
-              </Button>
-              <Button
-                variant={audience === "specialist" ? "default" : "ghost"}
-                onClick={() => setAudience("specialist")}
-                className="h-auto min-w-0 flex-1 basis-0 whitespace-normal px-3 py-2 text-center leading-tight sm:flex-none sm:basis-auto sm:whitespace-nowrap"
-              >
-                Для исполнителя
-              </Button>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <div className="flex items-stretch gap-2 rounded-2xl border border-black/5 bg-white/70 p-2 sm:items-center sm:gap-3 dark:border-white/10 dark:bg-white/5">
+                <Button
+                  variant={audience === "contractor" ? "default" : "ghost"}
+                  onClick={() => setAudience("contractor")}
+                  className="h-auto min-w-0 flex-1 basis-0 whitespace-normal px-3 py-2 text-center leading-tight sm:flex-none sm:basis-auto sm:whitespace-nowrap"
+                >
+                  Для подрядчика
+                </Button>
+                <Button
+                  variant={audience === "specialist" ? "default" : "ghost"}
+                  onClick={() => setAudience("specialist")}
+                  className="h-auto min-w-0 flex-1 basis-0 whitespace-normal px-3 py-2 text-center leading-tight sm:flex-none sm:basis-auto sm:whitespace-nowrap"
+                >
+                  Для исполнителя
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -1193,7 +1382,7 @@ export default function Home() {
                 <p className="mt-3 text-sm text-mutedForeground">
                   Шаблоны документации и прозрачная коммуникация.
                   Всё для эффективной удалённой работы и роста в профессиональном
-                  сообществе ICIA с поддержкой через Q&A.
+                  контуре ICIA с поддержкой через Q&A.
                 </p>
                 <ul className="mt-6 space-y-3 text-sm text-mutedForeground">
                   {[
@@ -1210,6 +1399,34 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {audience === "contractor" && (
+              <div className="mt-8 border-t border-black/10 pt-6 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSlideIndex(0);
+                    setIsPresentationOpen(true);
+                  }}
+                  className="group relative w-full overflow-hidden rounded-[1.5rem] border border-sky-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(219,234,254,0.92)_45%,rgba(191,219,254,0.95)_100%)] p-4 text-left shadow-[0_24px_60px_rgba(37,99,235,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_30px_80px_rgba(37,99,235,0.24)] dark:border-sky-400/20 dark:bg-[linear-gradient(135deg,rgba(14,25,44,0.98),rgba(16,57,110,0.86)_55%,rgba(10,132,255,0.42)_100%)]"
+                >
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.9),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.22),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(125,211,252,0.18),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.2),transparent_45%)]" />
+                  <div className="relative flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700 dark:text-sky-200/80">
+                        WS ICIA
+                      </p>
+                      <p className="mt-2 max-w-sm text-base font-semibold leading-6 text-slate-950 dark:text-white">
+                        Подробнее о платформе
+                      </p>
+                    </div>
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-white transition group-hover:scale-105 dark:bg-white dark:text-slate-950">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </div>
+                  </div>
+                </button>
               </div>
             )}
           </motion.div>
@@ -1340,6 +1557,421 @@ export default function Home() {
         </motion.div>
       </motion.section>
 
+      <AnimatePresence>
+        {isPresentationOpen && (
+          <motion.div
+            className="fixed inset-0 z-[80] overflow-y-auto bg-[rgba(240,244,251,0.72)] px-4 py-4 backdrop-blur-2xl dark:bg-[rgba(4,8,18,0.82)] sm:px-6 sm:py-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.button
+              type="button"
+              className="absolute inset-0"
+              onClick={() => setIsPresentationOpen(false)}
+              aria-label="Закрыть презентацию"
+            />
+            <motion.div
+              className="relative mx-auto my-8 flex w-full max-w-7xl flex-col overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,247,252,0.92))] shadow-[0_32px_120px_rgba(15,23,42,0.24)] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(9,14,24,0.96),rgba(10,17,30,0.92))]"
+              initial={{ y: 24, opacity: 0, scale: 0.985 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 20, opacity: 0, scale: 0.985 }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+            >
+              <div className="relative overflow-hidden border-b border-black/5 px-5 py-4 dark:border-white/10 sm:px-8">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_30%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.14),transparent_28%)]" />
+                <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-mutedForeground">
+                      WS ICIA Presentation
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-foreground sm:text-xl">
+                      Операционная платформа для управления задачами
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-full border border-black/5 bg-white/70 px-4 py-2 text-xs font-semibold text-mutedForeground dark:border-white/10 dark:bg-white/5">
+                      Слайд {activeSlide.id} / {platformPresentationSlides.length}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsPresentationOpen(false)}
+                      className="h-11 w-11 rounded-full p-0"
+                      aria-label="Закрыть презентацию"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative lg:pr-[340px]">
+                <div
+                  ref={presentationContentRef}
+                  className="relative flex flex-col justify-between overflow-hidden px-5 py-6 sm:px-8 sm:py-8"
+                >
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(37,99,235,0.12),transparent_26%),radial-gradient(circle_at_85%_16%,rgba(56,189,248,0.14),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.55),rgba(255,255,255,0))] dark:bg-[radial-gradient(circle_at_20%_18%,rgba(37,99,235,0.18),transparent_28%),radial-gradient(circle_at_85%_16%,rgba(34,211,238,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))]" />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeSlide.id}
+                      className="relative flex flex-col"
+                      initial={{ opacity: 0, y: 18 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -18 }}
+                      transition={{ duration: 0.24, ease: "easeOut" }}
+                    >
+                      <div className="max-w-4xl shrink-0">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="rounded-full border border-black/5 bg-white/75 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-mutedForeground dark:border-white/10 dark:bg-white/5">
+                            Слайд {activeSlide.id}
+                          </span>
+                          {activeSlide.eyebrow && (
+                            <span className="rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+                              {activeSlide.eyebrow}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-6 max-w-4xl">
+                          <h3 className="flex flex-wrap items-start gap-x-4 gap-y-3 text-3xl font-semibold leading-tight text-foreground sm:text-5xl sm:leading-[1.05]">
+                            <span className="max-w-3xl">{activeSlide.title}</span>
+                            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] border border-black/5 bg-white/75 text-slate-700 shadow-[0_16px_30px_rgba(15,23,42,0.07)] dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-100 sm:h-14 sm:w-14 sm:rounded-[1.2rem]">
+                              <ActiveSlideIcon sx={{ fontSize: 28 }} />
+                            </span>
+                          </h3>
+                        </div>
+                        {activeSlide.subtitle && (
+                          <p className="mt-5 max-w-2xl text-base leading-7 text-mutedForeground sm:text-xl">
+                            {activeSlide.subtitle}
+                          </p>
+                        )}
+                      </div>
+
+                      {activeSlide.id === 1 && (
+                        <div className="mt-8">
+                          <div className="relative overflow-hidden rounded-[2rem] border border-black/5 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(232,241,252,0.92))] p-5 shadow-[0_24px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.04),rgba(37,99,235,0.08))]">
+                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(125,211,252,0.12),transparent_26%)]" />
+                            <div className="relative rounded-[1.5rem] border border-slate-300/60 bg-white/80 px-6 py-7 shadow-[0_18px_40px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-white/[0.03] sm:px-8 sm:py-9">
+                              <p className="whitespace-pre-line text-base leading-7 text-mutedForeground sm:text-xl">
+                                {"Добро пожаловать в WS ICIA.\nПокажем, как вся работа собирается в одной системе."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeSlide.bullets && activeSlide.layout === "pill-list" && (
+                        <div className="mt-8 flex flex-wrap gap-3">
+                          {activeSlide.bullets.map((bullet) => (
+                            <span
+                              key={bullet}
+                              className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/72 px-4 py-2 text-sm font-medium text-slate-700 shadow-[0_12px_24px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-white/[0.045] dark:text-slate-200"
+                            >
+                              <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} />
+                              {bullet}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {activeSlide.bullets && activeSlide.layout === "feature-list" && (
+                        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                          {activeSlide.bullets.map((bullet, index) => (
+                            <div
+                              key={bullet}
+                              className="rounded-[1.35rem] border border-black/5 bg-white/60 px-4 py-4 shadow-[0_14px_30px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-white/[0.04]"
+                            >
+                              <div className="flex items-start gap-3">
+                                <div
+                                  className={cn(
+                                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                                    activeSlide.id === 3 || activeSlide.id === 5 || activeSlide.id === 8
+                                      ? "bg-[rgba(59,130,246,0.12)] text-[rgb(37,99,235)] dark:bg-[rgba(56,189,248,0.14)] dark:text-[rgb(125,211,252)]"
+                                      : activeSlide.id === 6
+                                        ? "border border-black/5 bg-white/70 text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100"
+                                      : "bg-slate-950 text-white dark:bg-white dark:text-slate-950"
+                                  )}
+                                >
+                                  {activeSlide.id === 3 ? (
+                                    <>
+                                      {index === 0 && <AssignmentIndIcon sx={{ fontSize: 18 }} />}
+                                      {index === 1 && <PendingActionsIcon sx={{ fontSize: 18 }} />}
+                                      {index === 2 && <FolderOpenIcon sx={{ fontSize: 18 }} />}
+                                      {index === 3 && <RateReviewIcon sx={{ fontSize: 18 }} />}
+                                      {index === 4 && <HandshakeIcon sx={{ fontSize: 18 }} />}
+                                      {index === 5 && <ManageAccountsIcon sx={{ fontSize: 18 }} />}
+                                      {index === 6 && <ForumOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 7 && <DashboardCustomizeOutlinedIcon sx={{ fontSize: 18 }} />}
+                                    </>
+                                  ) : activeSlide.id === 5 ? (
+                                    <>
+                                      {index === 0 && <AssignmentIndOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 1 && <BallotOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 2 && <AssignmentAddIcon sx={{ fontSize: 18 }} />}
+                                      {index === 3 && <FactCheckOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 4 && <BadgeOutlinedIcon sx={{ fontSize: 18 }} />}
+                                    </>
+                                  ) : activeSlide.id === 6 ? (
+                                    <>
+                                      {index === 0 && <FileUploadOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 1 && <TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 2 && <RateReviewOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 3 && <HistoryOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 4 && <FolderCopyOutlinedIcon sx={{ fontSize: 18 }} />}
+                                    </>
+                                  ) : activeSlide.id === 8 ? (
+                                    <>
+                                      {index === 0 && <LooksOneOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 1 && <GroupAddOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 2 && <ScienceOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index === 3 && <InsightsOutlinedIcon sx={{ fontSize: 18 }} />}
+                                    </>
+                                  ) : (
+                                    <>
+                                      {index % 5 === 0 && <VerifiedOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index % 5 === 1 && <ChecklistRtlRoundedIcon sx={{ fontSize: 18 }} />}
+                                      {index % 5 === 2 && <Groups2OutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index % 5 === 3 && <InsightsOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      {index % 5 === 4 && <RocketLaunchOutlinedIcon sx={{ fontSize: 18 }} />}
+                                    </>
+                                  )}
+                                </div>
+                                <p className="pt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
+                                  {bullet}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {activeSlide.bullets &&
+                        activeSlide.layout !== "pill-list" &&
+                        activeSlide.layout !== "feature-list" &&
+                        activeSlide.layout !== "hero" && (
+                          <ul className={bulletColumnsClass}>
+                            {activeSlide.bullets.map((bullet, index) => (
+                              <li
+                                key={bullet}
+                                className={cn(
+                                  "text-slate-700 dark:text-slate-200",
+                                  activeSlide.layout === "compact-list"
+                                    ? "flex items-start gap-3 rounded-[1.1rem] border border-black/5 bg-white/55 px-4 py-3 text-sm leading-6 dark:border-white/10 dark:bg-white/[0.035]"
+                                    : "flex items-center gap-4 text-base leading-7"
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "flex shrink-0 items-center justify-center rounded-full",
+                                    activeSlide.layout === "compact-list"
+                                      ? "mt-0.5 h-7 w-7 bg-slate-950 text-white dark:bg-white dark:text-slate-950"
+                                      : "h-9 w-9 border border-black/5 bg-white/70 text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100"
+                                  )}
+                                >
+                                  {activeSlide.id === 2 ? (
+                                    <ErrorOutlineIcon
+                                      sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }}
+                                    />
+                                  ) : activeSlide.id === 7 ? (
+                                    <>
+                                      {index === 0 && <AccountTreeOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index === 1 && <GroupsOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index === 2 && <SettingsSuggestOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index === 3 && <VisibilityOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index === 4 && <TaskAltOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index === 5 && <HubOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                    </>
+                                  ) : (
+                                    <>
+                                      {index % 6 === 0 && <VerifiedOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index % 6 === 1 && <Groups2OutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index % 6 === 2 && <AssignmentOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index % 6 === 3 && <ChatBubbleOutlineRoundedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index % 6 === 4 && <InsightsOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                      {index % 6 === 5 && <BusinessCenterOutlinedIcon sx={{ fontSize: activeSlide.layout === "compact-list" ? 16 : 18 }} />}
+                                    </>
+                                  )}
+                                </span>
+                                <span>{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                      {activeSlide.steps && (
+                        <div className="mt-8 max-w-3xl">
+                          <Stepper
+                            orientation="vertical"
+                            activeStep={activeSlide.steps.length}
+                            sx={{
+                              ".MuiStepConnector-line": {
+                                borderColor: "rgba(148, 163, 184, 0.28)"
+                              },
+                              ".MuiStepLabel-label": {
+                                color: "inherit",
+                                fontSize: "1rem",
+                                lineHeight: 1.75,
+                                fontWeight: 500
+                              },
+                              ".MuiStepIcon-root": {
+                                color: "rgba(37, 99, 235, 0.22)"
+                              },
+                              ".MuiStepIcon-root.Mui-active, .MuiStepIcon-root.Mui-completed": {
+                                color: "rgb(37, 99, 235)"
+                              }
+                            }}
+                          >
+                            {activeSlide.steps.map((step, index) => (
+                              <Step key={step} completed>
+                                <StepLabel
+                                  icon={
+                                    activeSlide.id === 8 ? (
+                                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(59,130,246,0.12)] text-[rgb(37,99,235)] dark:bg-[rgba(56,189,248,0.14)] dark:text-[rgb(125,211,252)]">
+                                        {index === 0 && <LooksOneOutlinedIcon sx={{ fontSize: 18 }} />}
+                                        {index === 1 && <GroupAddOutlinedIcon sx={{ fontSize: 18 }} />}
+                                        {index === 2 && <ScienceOutlinedIcon sx={{ fontSize: 18 }} />}
+                                        {index === 3 && <InsightsOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      </span>
+                                    ) : undefined
+                                  }
+                                  sx={
+                                    activeSlide.id === 4
+                                      ? {
+                                          ".MuiStepLabel-iconContainer": {
+                                            paddingRight: "10px"
+                                          },
+                                          ".MuiStepIcon-root": {
+                                            fontSize: "1.35rem"
+                                          }
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  {step}
+                                </StepLabel>
+                              </Step>
+                            ))}
+                          </Stepper>
+                          {activeSlide.id === 8 && (
+                            <div className="mt-8">
+                              <Button
+                                asChild
+                                size="lg"
+                                className="rounded-full px-8"
+                              >
+                                <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
+                                  Начать бесплатно
+                                </a>
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+
+                  <div className="relative mt-8 flex flex-col gap-4 border-t border-black/5 pt-6 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="max-w-2xl">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-mutedForeground">
+                        Ключевой тезис
+                      </p>
+                      <p className="mt-3 text-sm leading-7 text-mutedForeground sm:text-base">
+                        {activeSlide.note}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          setActiveSlideIndex((prev) => Math.max(prev - 1, 0))
+                        }
+                        disabled={isFirstSlide}
+                        className="h-12 rounded-full px-5"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Назад
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (isLastSlide) {
+                            setIsPresentationOpen(false);
+                            return;
+                          }
+
+                          setActiveSlideIndex((prev) =>
+                            Math.min(prev + 1, platformPresentationSlides.length - 1)
+                          );
+                        }}
+                        className="h-12 rounded-full px-5"
+                      >
+                        {isLastSlide ? "Закрыть" : "Далее"}
+                        {!isLastSlide && <ChevronRight className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <aside className="flex flex-col border-t border-black/5 bg-black/[0.02] px-5 py-6 dark:border-white/10 dark:bg-white/[0.025] lg:absolute lg:right-0 lg:top-0 lg:w-[340px] lg:border-l lg:border-t-0 sm:px-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-foreground">
+                      Все слайды
+                    </p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-mutedForeground">
+                      {platformPresentationSlides.length} экранов
+                    </p>
+                  </div>
+                  <div
+                    className="mt-5 grid gap-2 overflow-y-auto pr-1"
+                    style={
+                      presentationContentHeight > 0
+                        ? { maxHeight: Math.max(presentationContentHeight - 72, 240) }
+                        : undefined
+                    }
+                  >
+                    {platformPresentationSlides.map((slide, index) => (
+                      <button
+                        key={slide.id}
+                        type="button"
+                        onClick={() => setActiveSlideIndex(index)}
+                        className={cn(
+                          "relative rounded-[1.35rem] border px-4 py-3 text-left transition",
+                          index === activeSlideIndex
+                            ? "border-primary/40 bg-[linear-gradient(135deg,rgba(255,255,255,1),rgba(219,234,254,0.95))] text-foreground shadow-[0_18px_40px_rgba(37,99,235,0.18)] dark:bg-[linear-gradient(135deg,rgba(37,99,235,0.2),rgba(255,255,255,0.08))]"
+                            : "border-black/5 bg-white/55 text-mutedForeground hover:bg-white/80 dark:border-white/10 dark:bg-white/[0.035] dark:hover:bg-white/[0.06]"
+                        )}
+                      >
+                        {index === activeSlideIndex && (
+                          <span className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-primary" />
+                        )}
+                        <p
+                          className={cn(
+                            "text-xs font-semibold uppercase tracking-[0.2em]",
+                            index === activeSlideIndex
+                              ? "text-primary"
+                              : "text-mutedForeground"
+                          )}
+                        >
+                          {String(slide.id).padStart(2, "0")}
+                        </p>
+                        <p
+                          className={cn(
+                            "mt-2 text-sm font-medium leading-5",
+                            index === activeSlideIndex
+                              ? "text-foreground"
+                              : "text-inherit"
+                          )}
+                        >
+                          {slide.title}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </aside>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.section
         className="mx-auto w-full max-w-6xl px-6 py-20"
         initial="hidden"
@@ -1352,11 +1984,11 @@ export default function Home() {
           variants={fadeUp}
         >
           <div className="space-y-6">
-            <p className="text-sm uppercase tracking-[0.2em] text-mutedForeground">
+            <p className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.24em] text-primary shadow-[0_10px_24px_rgba(37,99,235,0.08)]">
               Преимущества для подрядчиков
             </p>
-            <h2 className="text-3xl font-semibold sm:text-4xl">
-              Контроль, эффективность, аналитика
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+              Больше контроля, меньше ручной координации
             </h2>
             <ul className="space-y-3 text-mutedForeground">
               {["Сокращение сроков работ", "Прозрачный контроль качества", "Аналитика по регионам и исполнителям"].map(
@@ -1370,7 +2002,7 @@ export default function Home() {
             </ul>
             <Button asChild size="lg">
               <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
-                Присоединиться как подрядчик
+                Подключиться как подрядчик
               </a>
             </Button>
           </div>
@@ -1378,15 +2010,15 @@ export default function Home() {
             {[
               {
                 title: "Единый контроль объектов",
-                description: "Вся информация по задачам и объектам и задачам — в одном месте. Удобно, прозрачно, без лишних чатов.",
+                description: "Вся информация по задачам, объектам и статусам — в одной системе без разрыва между постановкой, выполнением и приемкой.",
               },
               {
                 title: "Быстрые отчёты",
-                description: "Фотооотчеты, прогресс и планирование задач — в пару кликов. Больше не нужно собирать отчёты вручную.",
+                description: "Фотоотчеты, прогресс и согласование результата происходят внутри платформы, а не в разрозненных каналах.",
               },
               {
                 title: "Поиск исполнителей",
-                description: "Найди нужную бригаду или инженера-проектировщика в любом регионе — быстро, с проверенным опытом и рейтингом.",
+                description: "Подключайте исполнителей и подрядчиков в рамках экосистемы ICIA и работайте с ними в одном операционном контуре.",
               },
             ].map((item) => (
               <div
@@ -1434,7 +2066,7 @@ export default function Home() {
               {
                 title: "Q&A и поддержка сообщества",
                 description:
-                  "Задавай вопросы по монтажу, проектированию и согласованиям, получай быстрые ответы от коллег и экспертов ICIA.",
+                  "Задавай вопросы по монтажу, проектированию и согласованиям, получай быстрые ответы внутри профессиональной среды ICIA.",
               },
             ].map((item) => (
               <div
@@ -1449,11 +2081,11 @@ export default function Home() {
             ))}
           </div>
           <div className="order-1 space-y-6 lg:order-2">
-            <p className="text-sm uppercase tracking-[0.2em] text-mutedForeground">
+            <p className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.24em] text-primary shadow-[0_10px_24px_rgba(37,99,235,0.08)]">
               Преимущества для исполнителей
             </p>
-            <h2 className="text-3xl font-semibold sm:text-4xl">
-              Стабильные задачи и рост рейтинга
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+              Прозрачные задачи и понятный рабочий контур
             </h2>
             <ul className="space-y-3 text-mutedForeground">
               {["Быстрый доступ к задачам", "Поиск публичных заказов", "Прозрачный учёт оплат", "Обучение и повышение квалификации", "Q&A и поддержка сообщества"].map(
@@ -1467,7 +2099,7 @@ export default function Home() {
             </ul>
             <Button asChild size="lg">
               <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
-                Присоединиться как специалист
+                Подключиться как исполнитель
               </a>
             </Button>
           </div>
@@ -1483,13 +2115,14 @@ export default function Home() {
       >
         <motion.div className="text-center" variants={fadeUp}>
           <p className="text-sm uppercase tracking-[0.2em] text-mutedForeground">
-            Связаться с ICIA
+            Есть вопросы?
           </p>
           <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
-            Будем рады ответить Вам
+            Свяжитесь с нами
           </h2>
           <p className="mt-3 text-mutedForeground">
-            Оставьте вопрос, и мы ответим в течение одного рабочего дня.
+            Оставьте заявку, и мы покажем платформу, обсудим ваш процесс и
+            предложим формат пилотного запуска.
           </p>
         </motion.div>
 
@@ -1541,23 +2174,6 @@ export default function Home() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="role">Роль</Label>
-            <select
-              id="role"
-              value={formState.role}
-              onChange={(event) =>
-                setFormState((prev) => ({ ...prev, role: event.target.value }))
-              }
-              className={cn(
-                "h-11 w-full rounded-2xl border border-border bg-transparent px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              )}
-            >
-              <option value="contractor">Подрядчик</option>
-              <option value="specialist">Исполнитель</option>
-              <option value="operator">Оператор</option>
-            </select>
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="message">Сообщение</Label>
             <Textarea
               id="message"
@@ -1581,7 +2197,7 @@ export default function Home() {
             <Alert className="border-primary/40">
               <AlertTitle>Спасибо!</AlertTitle>
               <AlertDescription>
-                Заявка отправлена. Мы свяжемся с вами в ближайшее время.
+                Сообщение отправлено. Мы свяжемся с вами в ближайшее время.
               </AlertDescription>
             </Alert>
           )}
@@ -1595,7 +2211,7 @@ export default function Home() {
               ICIA
             </p>
             <p className="text-mutedForeground">
-              Industrial Cellulars Installers Association
+              ICIA — Industrial Cellular Installers Association
             </p>
             <p className="text-xs text-mutedForeground">
               Политика конфиденциальности / 152-ФЗ
@@ -1604,7 +2220,7 @@ export default function Home() {
           <div className="space-y-2 text-sm text-mutedForeground">
             <p className="text-xs uppercase tracking-[0.2em]">Меню</p>
             <a href="/#about" className="block hover:text-foreground">О проекте</a>
-            <a href="/#platform" className="block hover:text-foreground">Приложение</a>
+            <a href="/#platform" className="block hover:text-foreground">Платформа</a>
             <a href="/#contact" className="block hover:text-foreground">Контакты</a>
           </div>
           <div className="space-y-3 text-sm text-mutedForeground">

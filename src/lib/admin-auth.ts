@@ -6,6 +6,8 @@ import path from "node:path";
 
 import nodemailer from "nodemailer";
 
+import { ensureServerEnv, requiredServerEnv } from "@/lib/server-env";
+
 type MagicTokenRecord = {
   hash: string;
   email: string;
@@ -25,14 +27,8 @@ const TOKEN_STORE_DIR = path.join(process.cwd(), "content", ".admin-auth");
 const TOKEN_STORE_FILE = path.join(TOKEN_STORE_DIR, "magic-tokens.json");
 const SESSION_COOKIE_NAME = "icia_admin_session";
 
-const requiredEnv = (name: string) => {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing env: ${name}`);
-  return value;
-};
-
-const getSessionSecret = () => requiredEnv("ADMIN_SESSION_SECRET");
-const getMagicSecret = () => requiredEnv("ADMIN_MAGIC_LINK_SECRET");
+const getSessionSecret = () => requiredServerEnv("ADMIN_SESSION_SECRET");
+const getMagicSecret = () => requiredServerEnv("ADMIN_MAGIC_LINK_SECRET");
 
 const normalizeEmail = (value: string) => value.trim().toLowerCase();
 
@@ -88,6 +84,8 @@ const pruneTokens = (tokens: MagicTokenRecord[]) => {
 };
 
 const getMailerConfig = () => {
+  ensureServerEnv();
+
   const host = process.env.ADMIN_EMAIL_HOST || process.env.CONTACT_EMAIL_HOST;
   const port = Number(process.env.ADMIN_EMAIL_PORT || process.env.CONTACT_EMAIL_PORT);
   const user = process.env.ADMIN_EMAIL_USER || process.env.CONTACT_EMAIL_USER;
@@ -121,6 +119,8 @@ export const isAdminEmailAllowed = (email: string) => {
 };
 
 export const createMagicLinkToken = async (email: string, requestedIp: string) => {
+  ensureServerEnv();
+
   const rawToken = randomBytes(32).toString("base64url");
   const hash = hashMagicToken(rawToken);
   const now = Date.now();
