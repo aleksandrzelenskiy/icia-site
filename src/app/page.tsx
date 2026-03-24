@@ -1032,7 +1032,7 @@ export default function Home() {
             />
           </a>
           <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--appbar-text)]/80 min-[900px]:flex">
-            <a href="/#about" className="transition hover:text-foreground">О ПЛАТФОРМЕ</a>
+            <a href="/#about" className="transition hover:text-foreground">О ПРОЕКТЕ</a>
             <a href="/#geography" className="transition hover:text-foreground">ГЕОГРАФИЯ</a>
             <a href="/#platform" className="transition hover:text-foreground">ПЛАТФОРМА</a>
             <a href="/#contact" className="transition hover:text-foreground">КОНТАКТЫ</a>
