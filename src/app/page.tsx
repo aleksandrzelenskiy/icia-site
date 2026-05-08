@@ -2228,50 +2228,110 @@ export default function Home() {
         viewport={{ once: true, amount: 0.2 }}
         variants={stagger}
       >
-        <motion.div
-          className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]"
-          variants={fadeUp}
-        >
-          <div className="space-y-6">
-            <p className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.24em] text-primary shadow-[0_10px_24px_rgba(37,99,235,0.08)]">
-              Storage, интеграции и billing
-            </p>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-              Платформа масштабируется как зрелый B2B-продукт
-            </h2>
-            <p className="text-mutedForeground">
-              WS ICIA закрывает не только производственный контур, но и слой
-              монетизации и enterprise-управления: storage providers, usage,
-              webhooks, интеграции, рабочие места и платежные модели для организации.
-            </p>
-          </div>
-          <div className="grid gap-4">
-            {[
-              {
-                title: "Storage layer",
-                description: "Platform S3, customer-managed S3, storage packages, overage и аудит событий хранения."
-              },
-              {
-                title: "Интеграции и webhooks",
-                description: "Google Sheets, Telegram, 1C ERP, webhooks с секретами, health, retry и audit log."
-              },
-              {
-                title: "Billing",
-                description: "B2B-кошелек организации, тарификация по активным местам, storage usage и add-ons."
-              },
-              {
-                title: "Финансовый контур задач",
-                description: "Статусы payable по задачам помогают исполнителю и организации видеть подтверждение и движение по оплате."
-              }
-            ].map((item) => (
-              <div key={item.title} className="glass rounded-2xl p-5">
-                <p className="text-sm font-semibold">{item.title}</p>
-                <p className="mt-2 text-xs text-mutedForeground">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
+        <motion.div className="space-y-6 text-center" variants={fadeUp}>
+          <p className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.24em] text-primary shadow-[0_10px_24px_rgba(37,99,235,0.08)]">
+            Тарифы
+          </p>
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+            Понятная модель подключения по рабочим местам
+          </h2>
+          <p className="mx-auto max-w-3xl text-mutedForeground">
+            Тарифы масштабируются вместе с организацией: от базового операционного
+            контура до расширенного управления подрядной сетью, документами,
+            оборудованием и интеграциями.
+          </p>
+        </motion.div>
+        <motion.div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4" variants={stagger}>
+          {[
+            {
+              title: "Free",
+              description: "Для первого запуска и проверки платформы на небольшом количестве задач.",
+              price: "0 ₽",
+              priceNote: "бесплатно",
+              details: [
+                "До 5 активных пользователей",
+                "1 проект в организации",
+                "До 10 задач в неделю",
+                "5 GB хранилища включено",
+                "Публикация задач через marketplace",
+                "Без внутреннего конкурса и расширенного рабочего контура"
+              ]
+            },
+            {
+              title: "Pro",
+              description: "Для команд, которым нужен единый рабочий контур по проектам и задачам.",
+              price: "750 ₽",
+              priceNote: "за пользователя в месяц",
+              details: [
+                "Полноценная командная работа в workspace",
+                "Организация, роли, участники и проекты",
+                "Проекты, задачи по объектам и БС",
+                "Мессенджер, прямое назначение и внутренние конкурсы",
+                "Фотоотчеты, комментарии и история событий",
+                "PDF-согласование документов с замечаниями и версиями",
+                "50 GB хранилища включено"
+              ]
+            },
+            {
+              title: "Premium",
+              description: "Для зрелых подрядных организаций с расширенным контролем, документацией и ресурсным учетом.",
+              price: "1 000 ₽",
+              priceNote: "за пользователя в месяц",
+              details: [
+                "Все возможности Pro",
+                "200 GB хранилища включено",
+                "Автоматизированный учет оборудования и контроль расхождений",
+                "Продвинутые интеграции, аудит и storage controls",
+                "Подключение собственного S3 и расширенный операционный контроль"
+              ]
+            },
+            {
+              title: "Enterprise",
+              description: "Для крупных организаций с индивидуальными требованиями по безопасности, SLA и модели внедрения.",
+              price: "Индивидуально",
+              priceNote: "по запросу",
+              details: [
+                "Все возможности Premium",
+                "Персональные лимиты по пользователям и storage",
+                "Индивидуальные интеграции и контур безопасности",
+                "SLA, audit requirements и договорная модель",
+                "Персональный менеджер и формат внедрения под организацию",
+                "Индивидуальная стоимость и условия"
+              ]
+            }
+          ].map((item) => (
+            <motion.div
+              key={item.title}
+              className="glass flex h-full flex-col rounded-3xl p-6 text-left"
+              variants={fadeUp}
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                {item.title}
+              </p>
+              <p className="mt-4 text-3xl font-semibold text-foreground">{item.price}</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-mutedForeground">
+                {item.priceNote}
+              </p>
+              <p className="mt-4 text-sm text-mutedForeground">
+                {item.description}
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-mutedForeground">
+                {item.details.map((detail) => (
+                  <li key={detail} className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                    <span>{detail}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </motion.div>
+        <motion.div className="mt-10 flex justify-center" variants={fadeUp}>
+          <Button asChild size="lg" className="rounded-full px-8">
+            <a href="https://ws.icia.pro/" target="_blank" rel="noreferrer">
+              Зарегистрироваться бесплатно
+            </a>
+          </Button>
         </motion.div>
       </motion.section>
       <motion.section
